@@ -1,0 +1,21 @@
+[package]
+name = "avr-int24-test"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+avr-device = { version = "0.7", features = [ "atmega328p", "rt" ] }
+avr-int24 = { path = "../avr-int24", features = [ "__internal_test__" ] }
+itoa = "1"
+
+[profile.dev]
+panic = "abort"
+lto = "fat"
+opt-level = "s"
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = "fat"
+opt-level = "s"

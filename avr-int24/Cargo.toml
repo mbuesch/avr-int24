@@ -1,0 +1,15 @@
+# -*- coding: utf-8 -*-
+
+[package]
+name = "avr-int24"
+version = "1.0.0"
+authors = [ "Michael Büsch <m@bues.ch>" ]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+
+[features]
+__internal_test__ = []
+
+# vim: ts=4 sw=4 expandtab
