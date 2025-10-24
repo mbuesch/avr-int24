@@ -7,7 +7,7 @@ import sys, serial
 
 s = serial.Serial(
     port=sys.argv[1],
-    baudrate=115200,
+    baudrate=19200,
 )
 
 buf = bytearray()

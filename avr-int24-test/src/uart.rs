@@ -15,10 +15,10 @@ impl Uart {
             w.bits(0)
         });
         dp.ubrr0.write(|w| {
-            w.bits(16) // 115200 baud
+            w.bits(25) // 19200 baud
         });
         dp.ucsr0a.write(|w| {
-            w.u2x0().set_bit()
+            w.u2x0().clear_bit()
         });
         dp.ucsr0c.write(|w| {
             w.umsel0().usart_async()
