@@ -58,13 +58,17 @@ fn main() -> ! {
 
     run_tests(&test);
 
-    loop {}
+    loop {
+        avr_device::interrupt::disable();
+        avr_device::asm::sleep();
+    }
 }
 
 #[panic_handler]
 fn panic(_: &core::panic::PanicInfo) -> ! {
     loop {
         avr_device::interrupt::disable();
+        avr_device::asm::sleep();
     }
 }
 
