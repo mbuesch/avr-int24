@@ -30,6 +30,13 @@ pub fn asm_mulsat24(a: Int24Raw, mut b: Int24Raw) -> Int24Raw {
             "   rjmp 70f",              // saturate to pos max
             "10:",
 
+            // store the expected product sign in SREG.T
+            "   clt",
+            "   mov {t}, {a2}",
+            "   eor {t}, {b2}",
+            "   sbrc {t}, 7",
+            "   set",
+
             // multiplication logic
 
             "   ldi {t}, 24",           // loop counter
@@ -58,18 +65,27 @@ pub fn asm_mulsat24(a: Int24Raw, mut b: Int24Raw) -> Int24Raw {
             "   dec {t}",
             "   brne 1b",               // loop counter != 0?
 
-            // check if saturation is needed
+            // product shall be negative?
+            "   brts 50f",
+
+            // check if positive saturation is needed
+            "   sbrc {b2}, 7",          // product sign
+            "   rjmp 70f",
             "   cp {p3}, __zero_reg__", // product high all bits cleared?
             "   cpc {p4}, __zero_reg__",
             "   cpc {p5}, __zero_reg__",
             "   breq 90f",
+            "   rjmp 70f",
+
+            // check if negative saturation is needed
+            "50:",
+            "   sbrs {b2}, 7",          // product sign
+            "   rjmp 60f",
             "   ldi {t}, 0xFF",         // product high all bits set?
             "   cp {p3}, {t}",
             "   cpc {p4}, {t}",
             "   cpc {p5}, {t}",
             "   breq 90f",
-            "   sbrs {p5}, 7",          // saturate pos or neg
-            "   rjmp 70f",
 
             // saturate to negative min
             "60:",

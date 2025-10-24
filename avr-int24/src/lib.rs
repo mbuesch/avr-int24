@@ -288,6 +288,10 @@ mod test {
             print!("{text}");
         }
 
+        fn print_num(&self, value: u32) {
+            print!("{value}");
+        }
+
         fn begin(&self, name: &str) {
             println!("Begin: {name}");
         }

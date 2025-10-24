@@ -6,6 +6,7 @@ use crate::Int24;
 
 pub trait TestOps {
     fn print(&self, text: &str);
+    fn print_num(&self, value: u32);
     fn begin(&self, name: &str);
     fn assert(&self, line: u16, ok: bool);
 }

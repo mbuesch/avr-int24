@@ -18,26 +18,32 @@ struct TestRunner<'a> {
 }
 
 impl<'a> TestOps for TestRunner<'a> {
+    #[inline(never)]
     fn print(&self, text: &str) {
         self.uart.tx_str(text);
     }
 
     #[inline(never)]
+    fn print_num(&self, value: u32) {
+        let mut buf = itoa::Buffer::new();
+        self.print(buf.format(value));
+    }
+
+    #[inline(never)]
     fn begin(&self, name: &str) {
-        self.uart.tx_str("Begin: ");
-        self.uart.tx_str(name);
-        self.uart.tx_str("\n");
+        self.print("Begin: ");
+        self.print(name);
+        self.print("\n");
     }
 
     #[inline(never)]
     fn assert(&self, line: u16, ok: bool) {
-        self.uart.tx_str("line ");
-        let mut buf = itoa::Buffer::new();
-        self.uart.tx_str(buf.format(line));
+        self.print("line ");
+        self.print_num(line.into());
         if ok {
-            self.uart.tx_str(": Ok\n");
+            self.print(": Ok\n");
         } else {
-            self.uart.tx_str(": FAILED\n");
+            self.print(": FAILED\n");
             panic!();
         }
     }
