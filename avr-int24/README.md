@@ -16,7 +16,7 @@ It is designed for use on AVR microcontrollers.
 
 ## Usage
 
-To use the `Int24` type, add `avr-int24` as a ependency to your `Cargo.toml`
+To use the `Int24` type, add `avr-int24` as a dependency to your `Cargo.toml`
 
 ```toml
 [dependencies]
