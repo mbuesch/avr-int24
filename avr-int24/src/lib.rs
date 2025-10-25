@@ -9,7 +9,8 @@ pub use crate::raw::Int24Raw;
 use crate::raw::{
     abs24, add24,
     conv::{i16_to_i24raw, i24raw_to_i16_sat, i24raw_to_i32, i32_to_i24raw_sat},
-    div24, eq24, ge24, mul24, neg24, raw_zero, shl24, shl24_by8, shr24, shr24_by8, sub24,
+    div24, eq24, ge24, mul24, neg24, raw_zero, shl24, shl24_by8, shl24_by8_div24, shr24, shr24_by8,
+    sub24,
 };
 
 #[cfg(not(target_arch = "avr"))]
@@ -95,6 +96,11 @@ impl Int24 {
 
     pub const fn const_div(self, other: Self) -> Self {
         Self::from_i32(self.to_i32() / other.to_i32())
+    }
+
+    #[inline(never)]
+    pub fn shl8div(self, other: Self) -> Self {
+        Self::from_raw(shl24_by8_div24(self.0, other.0))
     }
 
     #[inline(never)]

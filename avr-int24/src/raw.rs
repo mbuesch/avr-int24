@@ -31,7 +31,12 @@ pub fn mul24(a: Int24Raw, b: Int24Raw) -> Int24Raw {
 
 #[inline(always)]
 pub fn div24(a: Int24Raw, b: Int24Raw) -> Int24Raw {
-    asm_divsat24(a, b)
+    asm_divsat24(a, b, false)
+}
+
+#[inline(always)]
+pub fn shl24_by8_div24(a: Int24Raw, b: Int24Raw) -> Int24Raw {
+    asm_divsat24(a, b, true)
 }
 
 #[inline(always)]

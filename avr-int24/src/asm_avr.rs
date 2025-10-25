@@ -128,18 +128,21 @@ pub fn asm_mulsat24(a: Int24Raw, mut b: Int24Raw) -> Int24Raw {
     b
 }
 
-#[inline(always)]
+#[inline(never)]
 #[allow(unused_assignments)]
-pub fn asm_divsat24(mut a: Int24Raw, mut b: Int24Raw) -> Int24Raw {
+pub fn asm_divsat24(mut a: Int24Raw, mut b: Int24Raw, a_shl8: bool) -> Int24Raw {
+    let a_shl8 = a_shl8 as u8;
     unsafe {
         asm!(
             // check division by zero
             "   cp {b0}, __zero_reg__",
             "   cpc {b1}, __zero_reg__",
             "   cpc {b2}, __zero_reg__",
-            "   brne 10f",
-            "   rjmp 50f",
-            "10:",
+            "   brne 1f",
+            "   sbrs {a2}, 7",
+            "   rjmp 70f",
+            "   rjmp 60f",
+            "1:",
 
             // saturate MIN/-1
             "   ldi {t}, 0xFF",
@@ -150,7 +153,9 @@ pub fn asm_divsat24(mut a: Int24Raw, mut b: Int24Raw) -> Int24Raw {
             "   cpc {a1}, __zero_reg__",
             "   ldi {t}, 0x80",
             "   cpc {a2}, {t}",
-            "   breq 70f",
+            "   brne 1f",
+            "   rjmp 70f",
+            "1:",
 
             // store the result sign in SREG.T
             "   clt",
@@ -161,44 +166,46 @@ pub fn asm_divsat24(mut a: Int24Raw, mut b: Int24Raw) -> Int24Raw {
 
             // a = abs(a)
             "   sbrs {a2}, 7",
-            "   rjmp 20f",
+            "   rjmp 1f",
             "   com {a2}",              // negate
             "   com {a1}",
             "   neg {a0}",
             "   sbci {a1}, 0xFF",
             "   sbci {a2}, 0xFF",
             "   sbrs {a2}, 7",
-            "   rjmp 20f",
+            "   rjmp 1f",
             "   ldi {a1}, 0xFF",        // saturate to max
             "   mov {a0}, {a1}",
             "   ldi {a2}, 0x7F",
-            "20:",
+            "1:",
 
             // b = abs(b)
             "   sbrs {b2}, 7",
-            "   rjmp 30f",
+            "   rjmp 1f",
             "   com {b2}",              // negate
             "   com {b1}",
             "   neg {b0}",
             "   sbci {b1}, 0xFF",
             "   sbci {b2}, 0xFF",
             "   sbrs {b2}, 7",
-            "   rjmp 30f",
+            "   rjmp 1f",
             "   ldi {b1}, 0xFF",        // saturate to max
             "   mov {b0}, {b1}",
             "   ldi {b2}, 0x7F",
-            "30:",
+            "1:",
 
-            // division logic
+            // check if 'a' shall be left shifted by 8 before division
+            "   cp {a_shl8}, __zero_reg__",
+            "   brne 50f",
+
+            // 24 bit division logic
 
             "   ldi {t}, 25",           // loop counter
-
             "   sub {rem0}, {rem0}",    // remainder = 0 and carry = 0
             "   sub {rem1}, {rem1}",
             "   sub {rem2}, {rem2}",
 
-            "40:",
-            "   rol {a0}",              // (dividend << 1) + carry
+            "1: rol {a0}",              // (dividend << 1) + carry
             "   rol {a1}",
             "   rol {a2}",
 
@@ -212,20 +219,63 @@ pub fn asm_divsat24(mut a: Int24Raw, mut b: Int24Raw) -> Int24Raw {
             "   sub {rem0}, {b0}",      // remainder -= divisor
             "   sbc {rem1}, {b1}",
             "   sbc {rem2}, {b2}",
-            "   brcs 41f",              // remainder was less than divisor?
+            "   brcs 2f",               // remainder was less than divisor?
             "   sec",                   // result lsb = 1
-            "   rjmp 40b",
-            "41:",
-            "   add {rem0}, {b0}",
+            "   rjmp 1b",
+            "2: add {rem0}, {b0}",
             "   adc {rem1}, {b1}",
             "   adc {rem2}, {b2}",
             "   clc",                   // result lsb = 0
-            "   rjmp 40b",
+            "   rjmp 1b",
 
-            // handle division by zero
+            // left shift 'a' by 8
             "50:",
-            "   sbrs {a2}, 7",
-            "   rjmp 70f",
+            "   mov {a3}, {a2}",
+            "   mov {a2}, {a1}",
+            "   mov {a1}, {a0}",
+            "   clr {a0}",
+
+            // 32 bit division logic
+
+            "   ldi {t}, 33",           // loop counter
+            "   sub {rem0}, {rem0}",    // remainder = 0 and carry = 0
+            "   sub {rem1}, {rem1}",
+            "   sub {rem2}, {rem2}",
+            "   sub {rem3}, {rem3}",
+
+            "1: rol {a0}",              // (dividend << 1) + carry
+            "   rol {a1}",
+            "   rol {a2}",
+            "   rol {a3}",
+
+            "   dec {t}",
+            "   breq 3f",               // loop counter == 0?
+
+            "   rol {rem0}",            // (remainder << 1) + dividend.23
+            "   rol {rem1}",
+            "   rol {rem2}",
+            "   rol {rem3}",
+
+            "   sub {rem0}, {b0}",      // remainder -= divisor
+            "   sbc {rem1}, {b1}",
+            "   sbc {rem2}, {b2}",
+            "   sbc {rem3}, __zero_reg__",
+            "   brcs 2f",               // remainder was less than divisor?
+            "   sec",                   // result lsb = 1
+            "   rjmp 1b",
+            "2: add {rem0}, {b0}",
+            "   adc {rem1}, {b1}",
+            "   adc {rem2}, {b2}",
+            "   adc {rem3}, __zero_reg__",
+            "   clc",                   // result lsb = 0
+            "   rjmp 1b",
+
+            "3: cp {a3}, __zero_reg__", // saturate 32 bit result
+            "   breq 80f",
+            "   ldi {a2}, 0x7F",
+            "   ldi {a1}, 0xFF",
+            "   mov {a0}, {a1}",
+            "   rjmp 80f",
 
             // saturate to negative min
             "60:",
@@ -255,6 +305,7 @@ pub fn asm_divsat24(mut a: Int24Raw, mut b: Int24Raw) -> Int24Raw {
             rem0 = out(reg) _,          // remainder
             rem1 = out(reg) _,
             rem2 = out(reg) _,
+            rem3 = out(reg) _,
 
             b0 = inout(reg) b.0,        // divisor
             b1 = inout(reg_upper) b.1,
@@ -263,6 +314,9 @@ pub fn asm_divsat24(mut a: Int24Raw, mut b: Int24Raw) -> Int24Raw {
             a0 = inout(reg) a.0,        // dividend and quotient
             a1 = inout(reg_upper) a.1,
             a2 = inout(reg_upper) a.2,
+            a3 = out(reg) _,
+
+            a_shl8 = in(reg) a_shl8,
 
             t = out(reg_upper) _,       // temporary and loop counter
 

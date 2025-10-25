@@ -228,6 +228,26 @@ fn test_div(t: &impl TestOps) {
     test_assert!(t, a / b == c);
     test_assert!(t, a.const_div(b) == c);
 }
+fn test_shl8div(t: &impl TestOps) {
+    t.begin("shl8div");
+
+    let a = Int24::from_i32(100000);
+    let b = Int24::from_i32(1010);
+    let c = Int24::from_i32(25346);
+    test_assert!(t, a.shl8div(b) == c);
+
+    let a = Int24::from_i32(100000);
+    let b = Int24::from_i32(-1010);
+    let c = Int24::from_i32(-25346);
+    test_assert!(t, a.shl8div(b) == c);
+
+    let a = Int24::from_i32(-100000);
+    let b = Int24::from_i32(1010);
+    let c = Int24::from_i32(-25346);
+    test_assert!(t, a.shl8div(b) == c);
+
+    //TODO
+}
 
 fn test_neg(t: &impl TestOps) {
     t.begin("neg");
@@ -355,6 +375,7 @@ pub fn run_tests(t: &impl TestOps) {
     test_sub(t);
     test_mul(t);
     test_div(t);
+    test_shl8div(t);
     test_neg(t);
     test_abs(t);
     test_shl(t);

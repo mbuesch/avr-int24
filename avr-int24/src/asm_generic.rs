@@ -28,7 +28,7 @@ pub fn asm_mulsat24(a: Int24Raw, b: Int24Raw) -> Int24Raw {
     }
 }
 
-pub fn asm_divsat24(a: Int24Raw, b: Int24Raw) -> Int24Raw {
+pub fn asm_divsat24(a: Int24Raw, b: Int24Raw, a_shl8: bool) -> Int24Raw {
     if b == (0, 0, 0) {
         if a.2 & 0x80 == 0 {
             (0xFF, 0xFF, 0x7F)
@@ -38,7 +38,12 @@ pub fn asm_divsat24(a: Int24Raw, b: Int24Raw) -> Int24Raw {
     } else if a == (0x00, 0x00, 0x80) && b == (0xFF, 0xFF, 0xFF) {
         (0xFF, 0xFF, 0x7F)
     } else {
-        from_i32(to_i32(a) / to_i32(b))
+        let mut a = to_i32(a);
+        let b = to_i32(b);
+        if a_shl8 {
+            a <<= 8;
+        }
+        from_i32(a / b)
     }
 }
 
