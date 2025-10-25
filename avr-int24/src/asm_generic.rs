@@ -43,7 +43,14 @@ pub fn asm_divsat24(a: Int24Raw, b: Int24Raw, a_shl8: bool) -> Int24Raw {
         if a_shl8 {
             a <<= 8;
         }
-        from_i32(a / b)
+        let c = a / b;
+        if c > 0x7F_FFFF {
+            from_i32(0x7F_FFFF)
+        } else if c < -0x80_0000 {
+            from_i32(-0x80_0000)
+        } else {
+            from_i32(c)
+        }
     }
 }
 

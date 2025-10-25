@@ -246,7 +246,10 @@ fn test_shl8div(t: &impl TestOps) {
     let c = Int24::from_i32(-25346);
     test_assert!(t, a.shl8div(b) == c);
 
-    //TODO
+    let a = Int24::from_i32(1000000);
+    let b = Int24::from_i32(2);
+    let c = Int24::from_i32(0x7FFFFF);
+    test_assert!(t, a.shl8div(b) == c);
 }
 
 fn test_neg(t: &impl TestOps) {
