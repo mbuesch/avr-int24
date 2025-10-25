@@ -5,6 +5,7 @@ all:
 	$(MAKE) -C avr-int24-test all
 
 clean:
+	$(MAKE) -C avr-int24 clean
 	$(MAKE) -C avr-int24-test clean
 
 dasm:
