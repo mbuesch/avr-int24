@@ -2,6 +2,7 @@
 
 [package]
 name = "avr-int24"
+description = "24 bit integer arithmetic for AVR"
 version = "1.0.0"
 authors = [ "Michael Büsch <m@bues.ch>" ]
 edition = "2024"

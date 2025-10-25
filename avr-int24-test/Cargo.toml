@@ -1,5 +1,6 @@
 [package]
 name = "avr-int24-test"
+description = "Target hardware unit tests for the avr-int24 crate"
 version = "0.0.0"
 edition = "2024"
 publish = false
