@@ -6,6 +6,11 @@ version = "1.0.0"
 authors = [ "Michael Büsch <m@bues.ch>" ]
 edition = "2024"
 license = "MIT OR Apache-2.0"
+homepage = "https://bues.ch/"
+repository = "https://github.com/mbuesch/avr-int24"
+readme = "README.md"
+categories = [ "algorithms", "embedded", "hardware-support", "mathematics", "no-std" ]
+keywords = [ "avr", "24-bit", "integer", "arithmetic" ]
 
 [dependencies]
 
