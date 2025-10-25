@@ -228,6 +228,7 @@ fn test_div(t: &impl TestOps) {
     test_assert!(t, a / b == c);
     test_assert!(t, a.const_div(b) == c);
 }
+
 fn test_shl8div(t: &impl TestOps) {
     t.begin("shl8div");
 
