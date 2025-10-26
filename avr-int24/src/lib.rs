@@ -7,16 +7,53 @@
 //! This library provides a 24-bit signed integer type, `Int24`, for Rust.
 //! It is designed for use on AVR microcontrollers.
 //!
+//! No operation from this crate ever panics.
+//!
+//! The operations don't overflow or underflow.
+//! Numeric limits are handled by saturating the result instead.
+//! One exception being the left shift operations, which don't saturate.
+//!
+//! Here are some example uses:
 //!
 //! ```
 //! use avr_int24::Int24;
 //!
-//! let a = Int24::from_i16(30000);
-//! let b = Int24::from_i16(10000);
+//! let a = Int24::from_i16(30_000);
+//! let b = Int24::from_i16(10_000);
 //!
+//! // Addition
 //! let c = a + b;
+//! assert_eq!(c.to_i32(), 40_000);
 //!
-//! assert_eq!(c.to_i32(), 40000);
+//! // Subtraction
+//! let c = b - a;
+//! assert_eq!(c.to_i32(), -20_000);
+//!
+//! // Multiplication
+//! let c = a * Int24::from_i16(-10);
+//! assert_eq!(c.to_i32(), -300_000);
+//!
+//! // Division
+//! let c = a / b;
+//! assert_eq!(c.to_i32(), 3);
+//!
+//! // Negation
+//! let c = -a;
+//! assert_eq!(c.to_i32(), -30_000);
+//!
+//! // Arithmetic right shift
+//! let c = a >> 2;
+//! assert_eq!(c.to_i32(), 7_500);
+//!
+//! // Left shift
+//! let c = a << 2;
+//! assert_eq!(c.to_i32(), 120_000);
+//!
+//! // Saturation
+//! let c = a * b;
+//! assert_eq!(c.to_i32(), 0x7F_FFFF);
+//! let c = a * -b;
+//! assert_eq!(c.to_i32(), -0x80_0000);
 //! ```
 
 #![cfg_attr(not(test), no_std)]
@@ -158,7 +195,8 @@ impl Int24 {
     }
 
     /// Left shift `self` by 8 bits and then divide the shifted value by `other`.
-    /// The result will be saturated to signed 24 bit.
+    /// The result is saturated to signed 24 bit.
+    /// The intermediate left shift by 8 bits is *not* saturated.
     ///
     /// The shifted intermediate value is kept in a big internal temporary memory
     /// which is not saturated.
@@ -168,7 +206,8 @@ impl Int24 {
     }
 
     /// Left shift `self` by 8 bits and then divide the shifted value by `other`.
-    /// The result will be saturated to signed 24 bit.
+    /// The result is saturated to signed 24 bit.
+    /// The intermediate left shift by 8 bits is *not* saturated.
     /// This is the `const` variant.
     ///
     /// Only call this from `const` context.
@@ -213,6 +252,8 @@ impl Int24 {
 
     /// Left shift `self` by 8 bits.
     ///
+    /// This operation does not saturate the result.
+    ///
     /// This operation is equivalent to calling `shl(8)`, but it is much faster.
     pub const fn shl8(self) -> Self {
         Self(shl24_by8(self.0))
@@ -220,18 +261,23 @@ impl Int24 {
 
     /// Left shift `self` by 16 bits.
     ///
+    /// This operation does not saturate the result.
+    ///
     /// This operation is equivalent to calling `shl(16)`, but it is much faster.
     pub const fn shl16(self) -> Self {
         Self(shl24_by16(self.0))
     }
 
     /// Left shift `self` by `count` number of bits.
+    ///
+    /// This operation does not saturate the result.
     #[inline(never)]
     pub fn shl(self, count: u8) -> Self {
         Self(shl24(self.0, count))
     }
 
     /// Left shift `self` by `count` number of bits.
+    /// This operation does not saturate the result.
     /// This is the `const` variant.
     ///
     /// Only call this from `const` context.
