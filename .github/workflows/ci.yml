@@ -1,0 +1,39 @@
+name: Build and test
+
+on:
+  push:
+  pull_request:
+
+env: 
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+
+jobs:
+  test_generic:
+    name: Test with generic asm
+    strategy:
+      matrix:
+        toolchain:
+          - 1.90.0
+          - nightly
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup update ${{ matrix.toolchain }}
+      - run: rustup default ${{ matrix.toolchain }}
+      - run: rustup component add clippy
+      - run: cargo clippy -- --deny warnings
+        working-directory: avr-int24
+      - run: cargo clippy --tests -- --deny warnings
+        working-directory: avr-int24
+      - run: cargo build --verbose
+        working-directory: avr-int24
+      - run: cargo test --verbose
+        working-directory: avr-int24
+      - if: matrix.toolchain == 'nightly'
+        run: |
+          rustup component add rust-src miri
+          cargo miri test
+        working-directory: avr-int24
+
+# vim: ts=2 sw=2 expandtab
