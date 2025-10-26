@@ -16,6 +16,7 @@ keywords = [ "avr", "24-bit", "integer", "arithmetic" ]
 [dependencies]
 
 [features]
+default = []
 __internal_test__ = []
 
 # vim: ts=4 sw=4 expandtab
