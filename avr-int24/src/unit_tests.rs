@@ -236,21 +236,25 @@ fn test_shl8div(t: &impl TestOps) {
     let b = Int24::from_i32(1010);
     let c = Int24::from_i32(25346);
     test_assert!(t, a.shl8div(b) == c);
+    test_assert!(t, a.const_shl8div(b) == c);
 
     let a = Int24::from_i32(100000);
     let b = Int24::from_i32(-1010);
     let c = Int24::from_i32(-25346);
     test_assert!(t, a.shl8div(b) == c);
+    test_assert!(t, a.const_shl8div(b) == c);
 
     let a = Int24::from_i32(-100000);
     let b = Int24::from_i32(1010);
     let c = Int24::from_i32(-25346);
     test_assert!(t, a.shl8div(b) == c);
+    test_assert!(t, a.const_shl8div(b) == c);
 
     let a = Int24::from_i32(1000000);
     let b = Int24::from_i32(2);
     let c = Int24::from_i32(0x7FFFFF);
     test_assert!(t, a.shl8div(b) == c);
+    test_assert!(t, a.const_shl8div(b) == c);
 }
 
 fn test_neg(t: &impl TestOps) {
@@ -322,6 +326,10 @@ fn test_shl(t: &impl TestOps) {
     let a = Int24::from_i32(1000);
     let b = Int24::from_i32(256000);
     test_assert!(t, a.shl8() == b);
+
+    let a = Int24::from_i32(10);
+    let b = Int24::from_i32(655360);
+    test_assert!(t, a.shl16() == b);
 }
 
 fn test_shr(t: &impl TestOps) {
@@ -332,9 +340,26 @@ fn test_shr(t: &impl TestOps) {
     test_assert!(t, a >> 2 == b);
     test_assert!(t, a.const_shr(2) == b);
 
+    let a = Int24::from_i32(-400000);
+    let b = Int24::from_i32(-100000);
+    test_assert!(t, a >> 2 == b);
+    test_assert!(t, a.const_shr(2) == b);
+
     let a = Int24::from_i32(256000);
     let b = Int24::from_i32(1000);
     test_assert!(t, a.shr8() == b);
+
+    let a = Int24::from_i32(-256000);
+    let b = Int24::from_i32(-1000);
+    test_assert!(t, a.shr8() == b);
+
+    let a = Int24::from_i32(655360);
+    let b = Int24::from_i32(10);
+    test_assert!(t, a.shr16() == b);
+
+    let a = Int24::from_i32(-655360);
+    let b = Int24::from_i32(-10);
+    test_assert!(t, a.shr16() == b);
 }
 
 fn test_cmp(t: &impl TestOps) {
