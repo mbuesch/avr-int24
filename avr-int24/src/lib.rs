@@ -67,6 +67,11 @@ impl Int24 {
         Self(v)
     }
 
+    /// Construct a new [Int24] from raw little endian bytes.
+    pub const fn from_le_bytes(bytes: [u8; 3]) -> Self {
+        Self::from_raw((bytes[0], bytes[1], bytes[2]))
+    }
+
     /// Construct a new [Int24] from a signed 16 bit integer.
     pub const fn from_i16(v: i16) -> Self {
         Self::from_raw(i16_to_i24raw(v))
@@ -75,6 +80,11 @@ impl Int24 {
     /// Construct and saturate a new [Int24] from a signed 32 bit integer.
     pub const fn from_i32(v: i32) -> Self {
         Self(i32_to_i24raw_sat(v))
+    }
+
+    /// Convert this [Int24] to little endian bytes.
+    pub const fn to_le_bytes(self) -> [u8; 3] {
+        [self.0.0, self.0.1, self.0.2]
     }
 
     /// Convert and saturate this [Int24] to a signed 16 bit integer.

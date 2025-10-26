@@ -17,6 +17,30 @@ macro_rules! test_assert {
     };
 }
 
+fn test_base(t: &impl TestOps) {
+    t.begin("base");
+
+    let a = 0;
+    let b = Int24::new().to_i32();
+    test_assert!(t, a == b);
+
+    let a = 0;
+    let b = Int24::zero().to_i32();
+    test_assert!(t, a == b);
+
+    let a = 0x030201;
+    let b = Int24::from_raw((1, 2, 3)).to_i32();
+    test_assert!(t, a == b);
+
+    let a = 0x030201;
+    let b = Int24::from_le_bytes([1, 2, 3]).to_i32();
+    test_assert!(t, a == b);
+
+    let a = [1, 2, 3];
+    let b = Int24::from_le_bytes([1, 2, 3]).to_le_bytes();
+    test_assert!(t, a == b);
+}
+
 fn test_conv_i16(t: &impl TestOps) {
     t.begin("conv_i16");
 
@@ -398,6 +422,7 @@ fn test_cmp(t: &impl TestOps) {
 
 pub fn run_tests(t: &impl TestOps) {
     t.print("\n\nBegin tests\n");
+    test_base(t);
     test_conv_i16(t);
     test_conv_i32(t);
     test_add(t);
