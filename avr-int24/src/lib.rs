@@ -62,7 +62,10 @@
 pub use crate::raw::Int24Raw;
 use crate::raw::{
     abs24, add24,
-    conv::{i16_to_i24raw, i24raw_to_i16_sat, i24raw_to_i32, i32_to_i24raw_sat},
+    conv::{
+        cast_i24raw_to_i8, cast_i24raw_to_i16, i8_to_i24raw, i16_to_i24raw, i24raw_to_i8_sat,
+        i24raw_to_i16_sat, i24raw_to_i32, i32_to_i24raw_sat,
+    },
     div24, eq24, ge24, mul24, neg24, raw_zero, shl24, shl24_by8, shl24_by8_div24, shl24_by16,
     shr24, shr24_by8, shr24_by16, sub24,
 };
@@ -81,6 +84,9 @@ use asm_avr as asm;
 pub mod unit_tests;
 
 mod raw;
+
+/// Shorthand for [Int24].
+pub type I24 = Int24;
 
 /// 24 bit signed integer.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
@@ -109,6 +115,11 @@ impl Int24 {
         Self::from_raw((bytes[0], bytes[1], bytes[2]))
     }
 
+    /// Construct a new [Int24] from a signed 8 bit integer.
+    pub const fn from_i8(v: i8) -> Self {
+        Self::from_raw(i8_to_i24raw(v))
+    }
+
     /// Construct a new [Int24] from a signed 16 bit integer.
     pub const fn from_i16(v: i16) -> Self {
         Self::from_raw(i16_to_i24raw(v))
@@ -124,6 +135,11 @@ impl Int24 {
         [self.0.0, self.0.1, self.0.2]
     }
 
+    /// Convert and saturate this [Int24] to a signed 8 bit integer.
+    pub const fn to_i8(self) -> i8 {
+        i24raw_to_i8_sat(self.0)
+    }
+
     /// Convert and saturate this [Int24] to a signed 16 bit integer.
     pub const fn to_i16(self) -> i16 {
         i24raw_to_i16_sat(self.0)
@@ -132,6 +148,16 @@ impl Int24 {
     /// Convert this [Int24] to a signed 32 bit integer.
     pub const fn to_i32(self) -> i32 {
         i24raw_to_i32(self.0)
+    }
+
+    /// Cast this [Int24] to a signed 8 bit integer *without* *saturation*.
+    pub const fn cast_to_i8(self) -> i8 {
+        cast_i24raw_to_i8(self.0)
+    }
+
+    /// Cast this [Int24] to a signed 16 bit integer *without* *saturation*.
+    pub const fn cast_to_i16(self) -> i16 {
+        cast_i24raw_to_i16(self.0)
     }
 
     /// Add and saturate two [Int24].

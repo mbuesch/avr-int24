@@ -41,16 +41,65 @@ fn test_base(t: &impl TestOps) {
     test_assert!(t, a == b);
 }
 
+fn test_conv_i8(t: &impl TestOps) {
+    t.begin("conv_i8");
+
+    let a = 0x12;
+    let b = Int24::from_i8(a);
+    let c = b.to_i8();
+    let d = b.cast_to_i8();
+    test_assert!(t, b.to_le_bytes() == [0x12, 0x00, 0x00] && a == c && a == d);
+
+    let a = -12;
+    let b = Int24::from_i8(a);
+    let c = b.to_i8();
+    let d = b.cast_to_i8();
+    test_assert!(t, b.to_le_bytes() == [0xF4, 0xFF, 0xFF] && a == c && a == d);
+
+    let a = 0x123456;
+    let b = Int24::from_i32(a).to_i8();
+    test_assert!(t, b as u8 == 0x7F);
+
+    let a = -0x123456;
+    let b = Int24::from_i32(a).to_i8();
+    test_assert!(t, b == -0x80);
+    test_assert!(t, b as u8 == 0x80);
+
+    let mut a = 0x0000_0080_u32;
+    loop {
+        let b = Int24::from_i32(a as i32).to_i8();
+        test_assert!(t, b as u8 == 0x7F);
+        if a == 0x4000_0000_u32 {
+            break;
+        }
+        a <<= 1;
+    }
+
+    let mut a = 0xFFFF_FF80_u32;
+    loop {
+        let b = Int24::from_i32(a as i32).to_i8();
+        test_assert!(t, b as u8 == 0x80);
+        if a == 0x8000_0000_u32 {
+            break;
+        }
+        a <<= 1;
+    }
+}
+
 fn test_conv_i16(t: &impl TestOps) {
     t.begin("conv_i16");
 
     let a = 0x1234;
-    let b = Int24::from_i16(a).to_i16();
-    test_assert!(t, a == b);
+    let b = Int24::from_i16(a);
+    let c = b.to_i16();
+    let d = b.cast_to_i16();
+    test_assert!(t, b.to_le_bytes() == [0x34, 0x12, 0x00] && a == c && a == d);
 
     let a = -0x1234;
-    let b = Int24::from_i16(a).to_i16();
-    test_assert!(t, a == b);
+    let b = Int24::from_i16(a);
+    let c = b.to_i16();
+    let d = b.cast_to_i16();
+    test_assert!(t, b.to_le_bytes() == [0xCC, 0xED, 0xFF] && a == c && a == d);
 
     let a = 0x123456;
     let b = Int24::from_i32(a).to_i16();
@@ -86,12 +135,14 @@ fn test_conv_i32(t: &impl TestOps) {
     t.begin("conv_i32");
 
     let a = 0x123456;
-    let b = Int24::from_i32(a).to_i32();
-    test_assert!(t, a == b);
+    let b = Int24::from_i32(a);
+    let c = b.to_i32();
+    test_assert!(t, b.to_le_bytes() == [0x56, 0x34, 0x12] && a == c);
 
     let a = -0x123456;
-    let b = Int24::from_i32(a).to_i32();
-    test_assert!(t, a == b);
+    let b = Int24::from_i32(a);
+    let c = b.to_i32();
+    test_assert!(t, b.to_le_bytes() == [0xAA, 0xCB, 0xED] && a == c);
 
     let a = 0x12345678;
     let b = Int24::from_i32(a).to_i32();
@@ -423,6 +474,7 @@ fn test_cmp(t: &impl TestOps) {
 pub fn run_tests(t: &impl TestOps) {
     t.print("\n\nBegin tests\n");
     test_base(t);
+    test_conv_i8(t);
     test_conv_i16(t);
     test_conv_i32(t);
     test_add(t);

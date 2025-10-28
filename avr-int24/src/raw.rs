@@ -142,6 +142,18 @@ pub fn ge24(a: Int24Raw, b: Int24Raw) -> bool {
 pub mod conv {
     use super::{Int24Raw, is_neg24, raw_max, raw_min};
 
+    /// Cast a raw 24 bit two's complement value to [i8] without saturation.
+    #[inline(always)]
+    pub const fn cast_i24raw_to_i8(v: Int24Raw) -> i8 {
+        i8::from_le_bytes([v.0])
+    }
+
+    /// Cast a raw 24 bit two's complement value to [i16] without saturation.
+    #[inline(always)]
+    pub const fn cast_i24raw_to_i16(v: Int24Raw) -> i16 {
+        i16::from_le_bytes([v.0, v.1])
+    }
+
     /// Convert a raw 24 bit two's complement value to [i32].
     #[inline(never)]
     pub const fn i24raw_to_i32(v: Int24Raw) -> i32 {
@@ -161,6 +173,20 @@ pub mod conv {
             i16::MIN // saturate
         } else {
             i16::MAX // saturate
+        }
+    }
+
+    /// Convert and saturate a raw 24 bit two's complement value to [i8].
+    #[inline(never)]
+    pub const fn i24raw_to_i8_sat(v: Int24Raw) -> i8 {
+        if (v.2 == 0 && v.1 == 0 && v.0 & 0x80 == 0)
+            || (v.2 == 0xFF && v.1 == 0xFF && v.0 & 0x80 != 0)
+        {
+            i8::from_le_bytes([v.0])
+        } else if is_neg24(v) {
+            i8::MIN // saturate
+        } else {
+            i8::MAX // saturate
         }
     }
 
@@ -185,6 +211,17 @@ pub mod conv {
             (v[0], v[1], 0x00)
         } else {
             (v[0], v[1], 0xFF)
+        }
+    }
+
+    /// Convert an [i8] value to a raw 24 bit two's complement value.
+    #[inline(never)]
+    pub const fn i8_to_i24raw(v: i8) -> Int24Raw {
+        let v = v.to_le_bytes();
+        if v[0] & 0x80 == 0 {
+            (v[0], 0x00, 0x00)
+        } else {
+            (v[0], 0xFF, 0xFF)
         }
     }
 }
