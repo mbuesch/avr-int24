@@ -133,7 +133,7 @@ pub fn eq24(a: Int24Raw, b: Int24Raw) -> bool {
     a == b
 }
 
-/// Check if the 24 bit number `a` is bigger than or equal to `b`.
+/// Check if the 24 bit number `a` is greater than or equal to `b`.
 #[inline(always)]
 pub fn ge24(a: Int24Raw, b: Int24Raw) -> bool {
     asm_ge24(a, b)

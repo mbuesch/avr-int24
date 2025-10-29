@@ -15,12 +15,12 @@ There are two ways to unit test the `avr-int24` crate:
 ### Cargo test
 
 The `cargo test` unit test is just a very basic smoke test.
-It does run the whole test suite, but it does this with a generic backend instead of the actual AVR assembly implementation.
+It runs the whole test suite with a generic backend instead of the actual AVR assembly implementation.
 Therefore, this test can only catch problems in non-AVR specific code.
 
 ### Native test on hardware
 
-This test build a test application for the AVR target hardware and runs this test on an actual AVR microcontroller.
+This test builds a test application for the AVR target hardware and runs this test on an actual AVR microcontroller.
 
 The required test hardware consists of:
 
@@ -29,8 +29,7 @@ The required test hardware consists of:
 - A serial connection (direction AVR to PC only).
 
 The microcontroller runs with internal 8 MHz clock.
-Therefore, the only peripheral that needs to be connected to the microcontroller is the serial connection.
-For example via some kind of UART-TTL to USB converter cable.
+Therefore, the only peripheral that needs to be connected to the microcontroller is the serial connection, for example via some kind of UART-TTL to USB converter cable.
 
 To build the test program, run the build command in the main directory of this git repository:
 

@@ -11,7 +11,7 @@
 //!
 //! The operations don't overflow or underflow.
 //! Numeric limits are handled by saturating the result instead.
-//! One exception being the left shift operations, which don't saturate.
+//! The only exception is the left shift operation, which does not saturate.
 //!
 //! Here are some example uses:
 //!
@@ -224,8 +224,8 @@ impl Int24 {
     /// The result is saturated to signed 24 bit.
     /// The intermediate left shift by 8 bits is *not* saturated.
     ///
-    /// The shifted intermediate value is kept in a big internal temporary memory
-    /// which is not saturated.
+    /// The shifted intermediate value is kept as 32 bits,
+    /// so it doesn't have to be saturated.
     #[inline(never)]
     pub fn shl8div(self, other: Self) -> Self {
         Self::from_raw(shl24_by8_div24(self.0, other.0))

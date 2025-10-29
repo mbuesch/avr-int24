@@ -38,5 +38,5 @@ assert_eq!(c.to_i32(), 40000);
 
 ## Rust compiler
 
-AVR inline assembly is not stabilized, yet.
+AVR inline assembly is not yet stabilized.
 Therefore, a `nightly` Rust compiler is required.
