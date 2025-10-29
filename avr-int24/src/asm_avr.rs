@@ -7,6 +7,7 @@ use core::arch::asm;
 
 #[inline(always)]
 pub fn asm_mulsat24(a: Int24Raw, mut b: Int24Raw) -> Int24Raw {
+    // SAFETY: The assembly code is manually checked.
     unsafe {
         asm!(
             // any operand is zero?
@@ -132,6 +133,7 @@ pub fn asm_mulsat24(a: Int24Raw, mut b: Int24Raw) -> Int24Raw {
 #[allow(unused_assignments)]
 pub fn asm_divsat24(mut a: Int24Raw, mut b: Int24Raw, a_shl8: bool) -> Int24Raw {
     let a_shl8 = a_shl8 as u8;
+    // SAFETY: The assembly code is manually checked.
     unsafe {
         asm!(
             // check division by zero
@@ -328,6 +330,7 @@ pub fn asm_divsat24(mut a: Int24Raw, mut b: Int24Raw, a_shl8: bool) -> Int24Raw 
 
 #[inline(always)]
 pub fn asm_negsat24(mut a: Int24Raw) -> Int24Raw {
+    // SAFETY: The assembly code is manually checked.
     unsafe {
         asm!(
             "   mov {t}, {a2}",
@@ -361,6 +364,7 @@ pub fn asm_negsat24(mut a: Int24Raw) -> Int24Raw {
 #[inline(always)]
 #[allow(unused_assignments)]
 pub fn asm_shl24(mut a: Int24Raw, mut count: u8) -> Int24Raw {
+    // SAFETY: The assembly code is manually checked.
     unsafe {
         asm!(
             "   and {count}, {count}",
@@ -386,6 +390,7 @@ pub fn asm_shl24(mut a: Int24Raw, mut count: u8) -> Int24Raw {
 #[inline(always)]
 #[allow(unused_assignments)]
 pub fn asm_shr24(mut a: Int24Raw, mut count: u8) -> Int24Raw {
+    // SAFETY: The assembly code is manually checked.
     unsafe {
         asm!(
             "   and {count}, {count}",
@@ -411,6 +416,7 @@ pub fn asm_shr24(mut a: Int24Raw, mut count: u8) -> Int24Raw {
 #[inline(always)]
 pub fn asm_ge24(a: Int24Raw, b: Int24Raw) -> bool {
     let mut c: u8;
+    // SAFETY: The assembly code is manually checked.
     unsafe {
         asm!(
             "   cp {a0}, {b0}",
