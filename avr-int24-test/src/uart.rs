@@ -11,22 +11,22 @@ pub struct Uart {
 impl Uart {
     #[rustfmt::skip]
     pub fn new(dp: USART0) -> Self {
-        dp.udr0.write(|w| {
-            w.bits(0)
+        dp.udr0().write(|w| {
+            w.set(0)
         });
-        dp.ubrr0.write(|w| {
-            w.bits(25) // 19200 baud
+        dp.ubrr0().write(|w| {
+            w.set(25) // 19200 baud
         });
-        dp.ucsr0a.write(|w| {
+        dp.ucsr0a().write(|w| {
             w.u2x0().clear_bit()
         });
-        dp.ucsr0c.write(|w| {
+        dp.ucsr0c().write(|w| {
             w.umsel0().usart_async()
              .ucsz0().chr8()
              .usbs0().stop1()
              .upm0().disabled()
         });
-        dp.ucsr0b.write(|w| {
+        dp.ucsr0b().write(|w| {
             w.txen0().set_bit()
              .rxen0().clear_bit()
         });
@@ -35,10 +35,10 @@ impl Uart {
     }
 
     pub fn tx_byte(&self, data: u8) {
-        while !self.dp.ucsr0a.read().udre0().bit() {
+        while !self.dp.ucsr0a().read().udre0().bit() {
             // wait for previous tx to finish.
         }
-        self.dp.udr0.write(|w| w.bits(data));
+        self.dp.udr0().write(|w| w.set(data));
     }
 
     pub fn tx_slice(&self, data: &[u8]) {

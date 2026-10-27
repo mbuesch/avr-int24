@@ -6,7 +6,7 @@ edition = "2024"
 publish = false
 
 [dependencies]
-avr-device = { version = "0.7", features = [ "atmega328p", "rt" ] }
+avr-device = { version = "0.9", features = [ "atmega328p", "rt" ] }
 avr-int24 = { path = "../avr-int24", features = [ "__internal_test__" ] }
 itoa = "1"
 
