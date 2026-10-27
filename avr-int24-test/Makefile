@@ -40,7 +40,9 @@ $(HEX): $(ELF)
 
 $(ELF):
 	AVR_CPU_FREQUENCY_HZ=$(AVR_CPU_FREQUENCY_HZ) \
-	cargo build --release -Zjson-target-spec
+	  cargo clippy -Zjson-target-spec -- --deny warnings
+	AVR_CPU_FREQUENCY_HZ=$(AVR_CPU_FREQUENCY_HZ) \
+	  cargo build --release -Zjson-target-spec
 
 .PHONY: $(ELF) # Always run cargo
 
