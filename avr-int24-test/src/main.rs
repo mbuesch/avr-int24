@@ -6,6 +6,7 @@
 #![no_main]
 #![feature(abi_avr_interrupt)]
 #![feature(asm_experimental_arch)]
+#![allow(unused_features)]
 
 mod uart;
 
