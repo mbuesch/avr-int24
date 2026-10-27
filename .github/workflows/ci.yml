@@ -33,7 +33,7 @@ jobs:
 
       - run: rustup update ${{ matrix.toolchain }}
       - run: rustup default ${{ matrix.toolchain }}
-      - run: rustup component add clippy
+      - run: rustup component add clippy rustfmt
       - if: matrix.toolchain == 'nightly'
         run: cargo fmt --all --check
         working-directory: avr-int24
