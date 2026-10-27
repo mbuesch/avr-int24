@@ -5,8 +5,13 @@
 
 import sys, serial
 
+if len(sys.argv) != 2:
+    print("Usage: console.py </dev/ttyUSBx>")
+    sys.exit(1)
+port = sys.argv[1]
+
 s = serial.Serial(
-    port=sys.argv[1],
+    port=port,
     baudrate=19200,
 )
 
@@ -14,7 +19,7 @@ buf = bytearray()
 while True:
     b = s.read(1)
     if b == b'\n':
-        print(buf.decode("UTF-8"))
+        print(buf.decode("UTF-8", errors="replace"))
         buf.clear()
     else:
         buf += b
