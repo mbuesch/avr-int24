@@ -238,7 +238,7 @@ impl Int24 {
     ///
     /// Only call this from `const` context.
     /// From non-`const` context call [Int24::shl8div] instead to get optimized code.
-    pub fn const_shl8div(self, other: Self) -> Self {
+    pub const fn const_shl8div(self, other: Self) -> Self {
         Self::from_i32((self.to_i32() << 8) / other.to_i32())
     }
 
