@@ -302,6 +302,21 @@ fn test_div(t: &impl TestOps) {
     let c = Int24::from_i32(0x7F_FFFF); // sat
     test_assert!(t, a / b == c);
     test_assert!(t, a.const_div(b) == c);
+
+    let max = Int24::from_i32(0x7F_FFFF);
+    let min = Int24::from_i32(-0x80_0000);
+    let zero = Int24::from_i32(0);
+    for (a, c) in [
+        (100, max),
+        (0, max),
+        (-100, min),
+        (max.to_i32(), max),
+        (min.to_i32(), min),
+    ] {
+        let a = Int24::from_i32(a);
+        test_assert!(t, a / zero == c);
+        test_assert!(t, a.const_div(zero) == c);
+    }
 }
 
 fn test_shl8div(t: &impl TestOps) {
@@ -330,6 +345,25 @@ fn test_shl8div(t: &impl TestOps) {
     let c = Int24::from_i32(0x7FFFFF);
     test_assert!(t, a.shl8div(b) == c);
     test_assert!(t, a.const_shl8div(b) == c);
+
+    let max = Int24::from_i32(0x7F_FFFF);
+    let min = Int24::from_i32(-0x80_0000);
+    let zero = Int24::from_i32(0);
+    for (a, c) in [
+        (100, max),
+        (0, max),
+        (-100, min),
+        (max.to_i32(), max),
+        (min.to_i32(), min),
+    ] {
+        let a = Int24::from_i32(a);
+        test_assert!(t, a.shl8div(zero) == c);
+        test_assert!(t, a.const_shl8div(zero) == c);
+    }
+
+    let b = Int24::from_i32(-1);
+    test_assert!(t, min.shl8div(b) == max);
+    test_assert!(t, min.const_shl8div(b) == max);
 }
 
 fn test_neg(t: &impl TestOps) {

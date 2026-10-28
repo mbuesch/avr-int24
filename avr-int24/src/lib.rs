@@ -167,8 +167,8 @@ impl Int24 {
     }
 
     /// Add and saturate two [Int24].
-    /// This is the `const` variant.
     ///
+    /// This is the `const` variant.
     /// Only call this from `const` context.
     /// From non-`const` context call [Int24::add] instead to get optimized code.
     pub const fn const_add(self, other: Self) -> Self {
@@ -182,8 +182,8 @@ impl Int24 {
     }
 
     /// Subtract and saturate two [Int24].
-    /// This is the `const` variant.
     ///
+    /// This is the `const` variant.
     /// Only call this from `const` context.
     /// From non-`const` context call [Int24::sub] instead to get optimized code.
     pub const fn const_sub(self, other: Self) -> Self {
@@ -197,8 +197,8 @@ impl Int24 {
     }
 
     /// Multiply and saturate two [Int24].
-    /// This is the `const` variant.
     ///
+    /// This is the `const` variant.
     /// Only call this from `const` context.
     /// From non-`const` context call [Int24::mul] instead to get optimized code.
     pub const fn const_mul(self, other: Self) -> Self {
@@ -206,18 +206,30 @@ impl Int24 {
     }
 
     /// Divide and saturate two [Int24].
+    ///
+    /// Division by zero does not panic, it saturates instead:
+    /// the result is `MAX` for a non-negative dividend (including `0 / 0`)
+    /// and `MIN` for a negative dividend.
     #[inline(never)]
     pub fn div(self, other: Self) -> Self {
         Self::from_raw(div24(self.0, other.0))
     }
 
     /// Divide and saturate two [Int24].
-    /// This is the `const` variant.
     ///
+    /// Division by zero does not panic, it saturates instead:
+    /// the result is `MAX` for a non-negative dividend (including `0 / 0`)
+    /// and `MIN` for a negative dividend.
+    ///
+    /// This is the `const` variant.
     /// Only call this from `const` context.
     /// From non-`const` context call [Int24::div] instead to get optimized code.
     pub const fn const_div(self, other: Self) -> Self {
-        Self::from_i32(self.to_i32() / other.to_i32())
+        let (a, b) = (self.to_i32(), other.to_i32());
+        if b == 0 {
+            return Self::from_i32(if a < 0 { i32::MIN } else { i32::MAX });
+        }
+        Self::from_i32(a / b)
     }
 
     /// Left shift `self` by 8 bits and then divide the shifted value by `other`.
@@ -226,6 +238,10 @@ impl Int24 {
     ///
     /// The shifted intermediate value is kept as 32 bits,
     /// so it doesn't have to be saturated.
+    ///
+    /// Division by zero does not panic, it saturates instead:
+    /// the result is `MAX` for a non-negative dividend (including `0 / 0`)
+    /// and `MIN` for a negative dividend.
     #[inline(never)]
     pub fn shl8div(self, other: Self) -> Self {
         Self::from_raw(shl24_by8_div24(self.0, other.0))
@@ -234,12 +250,25 @@ impl Int24 {
     /// Left shift `self` by 8 bits and then divide the shifted value by `other`.
     /// The result is saturated to signed 24 bit.
     /// The intermediate left shift by 8 bits is *not* saturated.
-    /// This is the `const` variant.
     ///
+    /// Division by zero does not panic, it saturates instead:
+    /// the result is `MAX` for a non-negative dividend (including `0 / 0`)
+    /// and `MIN` for a negative dividend.
+    ///
+    /// This is the `const` variant.
     /// Only call this from `const` context.
     /// From non-`const` context call [Int24::shl8div] instead to get optimized code.
     pub const fn const_shl8div(self, other: Self) -> Self {
-        Self::from_i32((self.to_i32() << 8) / other.to_i32())
+        let (a, b) = ((self.to_i32() as i64) << 8, other.to_i32() as i64);
+        if b == 0 {
+            return Self::from_i32(if a < 0 { i32::MIN } else { i32::MAX });
+        }
+        let q = a / b;
+        Self::from_i32(if q > i32::MAX as i64 {
+            i32::MAX
+        } else {
+            q as i32
+        })
     }
 
     /// Two's complement negate and saturate `self`.
@@ -249,8 +278,8 @@ impl Int24 {
     }
 
     /// Two's complement negate and saturate `self`.
-    /// This is the `const` variant.
     ///
+    /// This is the `const` variant.
     /// Only call this from `const` context.
     /// From non-`const` context call [Int24::neg] instead to get optimized code.
     pub const fn const_neg(self) -> Self {
@@ -264,8 +293,8 @@ impl Int24 {
     }
 
     /// Get the saturated absolute value of `self`.
-    /// This is the `const` variant.
     ///
+    /// This is the `const` variant.
     /// Only call this from `const` context.
     /// From non-`const` context call [Int24::abs] instead to get optimized code.
     pub const fn const_abs(self) -> Self {
@@ -304,8 +333,8 @@ impl Int24 {
 
     /// Left shift `self` by `count` number of bits.
     /// This operation does not saturate the result.
-    /// This is the `const` variant.
     ///
+    /// This is the `const` variant.
     /// Only call this from `const` context.
     /// From non-`const` context call [Int24::shl] instead to get optimized code.
     pub const fn const_shl(self, count: u8) -> Self {
@@ -337,8 +366,8 @@ impl Int24 {
     }
 
     /// Arithmetically right shift `self` by `count` number of bits.
-    /// This is the `const` variant.
     ///
+    /// This is the `const` variant.
     /// Only call this from `const` context.
     /// From non-`const` context call [Int24::shr] instead to get optimized code.
     pub const fn const_shr(self, count: u8) -> Self {
@@ -359,8 +388,8 @@ impl Int24 {
     }
 
     /// Compare `self` to `other` and return the result as [core::cmp::Ordering].
-    /// This is the `const` variant.
     ///
+    /// This is the `const` variant.
     /// Only call this from `const` context.
     /// From non-`const` context call [Int24::cmp] instead to get optimized code.
     pub const fn const_cmp(self, other: Self) -> core::cmp::Ordering {
