@@ -64,11 +64,14 @@ pub fn asm_negsat24(a: Int24Raw) -> Int24Raw {
 }
 
 pub fn asm_shl24(a: Int24Raw, count: u8) -> Int24Raw {
+    if count >= 24 {
+        return from_i32(0);
+    }
     from_i32(to_i32(a) << count)
 }
 
 pub fn asm_shr24(a: Int24Raw, count: u8) -> Int24Raw {
-    from_i32(to_i32(a) >> count)
+    from_i32(to_i32(a) >> count.min(23))
 }
 
 pub fn asm_ge24(a: Int24Raw, b: Int24Raw) -> bool {

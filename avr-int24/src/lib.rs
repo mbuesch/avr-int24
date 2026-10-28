@@ -309,7 +309,11 @@ impl Int24 {
     /// Only call this from `const` context.
     /// From non-`const` context call [Int24::shl] instead to get optimized code.
     pub const fn const_shl(self, count: u8) -> Self {
-        Self::from_i32(self.to_i32() << count)
+        if count >= 24 {
+            return Self::from_i32(0);
+        }
+        let b = (self.to_i32() << count).to_le_bytes();
+        Self::from_le_bytes([b[0], b[1], b[2]])
     }
 
     /// Arithmetically right shift `self` by 8 bits.
@@ -338,6 +342,7 @@ impl Int24 {
     /// Only call this from `const` context.
     /// From non-`const` context call [Int24::shr] instead to get optimized code.
     pub const fn const_shr(self, count: u8) -> Self {
+        let count = if count > 23 { 23 } else { count };
         Self::from_i32(self.to_i32() >> count)
     }
 

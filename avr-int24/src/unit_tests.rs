@@ -405,6 +405,18 @@ fn test_shl(t: &impl TestOps) {
     let a = Int24::from_i32(10);
     let b = Int24::from_i32(655360);
     test_assert!(t, a.shl16() == b);
+
+    let a = Int24::from_i32(-1);
+    let b = Int24::from_i32(-0x80_0000);
+    test_assert!(t, a << 23 == b);
+    test_assert!(t, a.const_shl(23) == b);
+
+    let a = Int24::from_i32(-1);
+    let b = Int24::from_i32(0);
+    for count in [24u8, 31, 32, 33, 40] {
+        test_assert!(t, a << count == b);
+        test_assert!(t, a.const_shl(count) == b);
+    }
 }
 
 fn test_shr(t: &impl TestOps) {
@@ -419,6 +431,26 @@ fn test_shr(t: &impl TestOps) {
     let b = Int24::from_i32(-100000);
     test_assert!(t, a >> 2 == b);
     test_assert!(t, a.const_shr(2) == b);
+
+    let a = Int24::from_i32(0x7F_FFFF);
+    let b = Int24::from_i32(0);
+    test_assert!(t, a >> 23 == b);
+    test_assert!(t, a.const_shr(23) == b);
+    let a = Int24::from_i32(-0x80_0000);
+    let b = Int24::from_i32(-1);
+    test_assert!(t, a >> 23 == b);
+    test_assert!(t, a.const_shr(23) == b);
+
+    for count in [24u8, 31, 32, 33, 40] {
+        let a = Int24::from_i32(0x7F_FFFF);
+        let b = Int24::from_i32(0);
+        test_assert!(t, a >> count == b);
+        test_assert!(t, a.const_shr(count) == b);
+        let a = Int24::from_i32(-0x80_0000);
+        let b = Int24::from_i32(-1);
+        test_assert!(t, a >> count == b);
+        test_assert!(t, a.const_shr(count) == b);
+    }
 
     let a = Int24::from_i32(256000);
     let b = Int24::from_i32(1000);
