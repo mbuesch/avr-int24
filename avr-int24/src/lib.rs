@@ -202,7 +202,14 @@ impl Int24 {
     /// Only call this from `const` context.
     /// From non-`const` context call [Int24::mul] instead to get optimized code.
     pub const fn const_mul(self, other: Self) -> Self {
-        Self::from_i32(self.to_i32() * other.to_i32())
+        let p = self.to_i32() as i64 * other.to_i32() as i64;
+        Self::from_i32(if p > i32::MAX as i64 {
+            i32::MAX
+        } else if p < i32::MIN as i64 {
+            i32::MIN
+        } else {
+            p as i32
+        })
     }
 
     /// Divide and saturate two [Int24].

@@ -274,6 +274,23 @@ fn test_mul(t: &impl TestOps) {
     let c = Int24::from_i32(-0x80_0000);
     test_assert!(t, a * b == c);
     test_assert!(t, a.const_mul(b) == c);
+
+    let max = Int24::from_i32(0x7F_FFFF);
+    let min = Int24::from_i32(-0x80_0000);
+    let a = Int24::from_i32(0x1000);
+    let b = Int24::from_i32(0x8_0000);
+    test_assert!(t, a * b == max);
+    test_assert!(t, a.const_mul(b) == max);
+    test_assert!(t, a * -b == min);
+    test_assert!(t, a.const_mul(b.neg()) == min);
+    test_assert!(t, max * max == max);
+    test_assert!(t, max.const_mul(max) == max);
+    test_assert!(t, min * min == max);
+    test_assert!(t, min.const_mul(min) == max);
+    test_assert!(t, max * min == min);
+    test_assert!(t, max.const_mul(min) == min);
+    test_assert!(t, min * max == min);
+    test_assert!(t, min.const_mul(max) == min);
 }
 
 fn test_div(t: &impl TestOps) {
