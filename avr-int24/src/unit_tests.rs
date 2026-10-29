@@ -277,7 +277,7 @@ fn test_mul(t: &impl TestOps) {
     test_assert!(t, a * b == c);
     test_assert!(t, a.const_mul(b) == c);
 
-    let a = Int24::from_i32(-0x80_FFFF);
+    let a = Int24::from_i32(-0x7F_0000);
     let b = Int24::from_i32(2);
     let c = MIN;
     test_assert!(t, a * b == c);
@@ -326,12 +326,14 @@ fn test_div(t: &impl TestOps) {
     test_assert!(t, a / b == c);
     test_assert!(t, a.const_div(b) == c);
 
-    for k in 0..24 {
+    for k in 0..23 {
         let p = Int24::from_i32(1 << k);
         let c = Int24::from_i32(-0x80_0000 >> k);
         test_assert!(t, MIN / p == c);
         test_assert!(t, MIN.const_div(p) == c);
     }
+    test_assert!(t, MIN / MAX == MINUSONE);
+    test_assert!(t, MIN.const_div(MAX) == MINUSONE);
     let c = Int24::from_i32(0x40_0000);
     test_assert!(t, MIN / Int24::from_i32(-2) == c);
     test_assert!(t, MIN.const_div(Int24::from_i32(-2)) == c);
