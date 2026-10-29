@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 // Copyright (C) 2025 Michael Büsch <m@bues.ch>
 
+#![allow(clippy::eq_op)]
+
 use crate::Int24;
 
 const MIN: Int24 = Int24::from_i32(-0x80_0000);
