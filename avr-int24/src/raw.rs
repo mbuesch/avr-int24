@@ -4,7 +4,7 @@
 
 use crate::{
     asm::{asm_divsat24, asm_ge24, asm_mulsat24, asm_negsat24, asm_shl24, asm_shr24},
-    raw::conv::{raw_to_i32, i32_to_raw_sat},
+    raw::conv::{i32_to_raw_sat, raw_to_i32},
 };
 
 /// Raw bytes tuple; Little Endian.

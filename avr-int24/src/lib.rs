@@ -63,8 +63,8 @@ pub use crate::raw::IntS24Raw;
 use crate::raw::{
     abs24, add24,
     conv::{
-        cast_raw_to_i8, cast_raw_to_i16, i8_to_raw, i16_to_raw, raw_to_i8_sat,
-        raw_to_i16_sat, raw_to_i32, i32_to_raw_sat,
+        cast_raw_to_i8, cast_raw_to_i16, i8_to_raw, i16_to_raw, i32_to_raw_sat, raw_to_i8_sat,
+        raw_to_i16_sat, raw_to_i32,
     },
     div24, eq24, ge24, mul24, neg24, raw_zero, shl24, shl24_by8, shl24_by8_div24, shl24_by16,
     shr24, shr24_by8, shr24_by16, sub24,
