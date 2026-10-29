@@ -4,6 +4,12 @@
 
 use crate::Int24;
 
+const MIN: Int24 = Int24::from_i32(-0x80_0000);
+const MAX: Int24 = Int24::from_i32(0x7F_FFFF);
+const ZERO: Int24 = Int24::from_i32(0);
+const ONE: Int24 = Int24::from_i32(1);
+const MINUSONE: Int24 = Int24::from_i32(-1);
+
 pub trait TestOps {
     fn print(&self, text: &str);
     fn print_num(&self, value: u32);
@@ -197,13 +203,13 @@ fn test_add(t: &impl TestOps) {
 
     let a = Int24::from_i32(0x7F_FFFF - 1);
     let b = Int24::from_i32(2);
-    let c = Int24::from_i32(0x7F_FFFF);
+    let c = MAX;
     test_assert!(t, a + b == c);
     test_assert!(t, a.const_add(b) == c);
 
     let a = Int24::from_i32(-0x80_0000 + 1);
     let b = Int24::from_i32(-2);
-    let c = Int24::from_i32(-0x80_0000);
+    let c = MIN;
     test_assert!(t, a + b == c);
     test_assert!(t, a.const_add(b) == c);
 }
@@ -231,13 +237,13 @@ fn test_sub(t: &impl TestOps) {
 
     let a = Int24::from_i32(-0x80_0000 + 1);
     let b = Int24::from_i32(2);
-    let c = Int24::from_i32(-0x80_0000);
+    let c = MIN;
     test_assert!(t, a - b == c);
     test_assert!(t, a.const_sub(b) == c);
 
     let a = Int24::from_i32(0x7F_FFFF - 1);
     let b = Int24::from_i32(-2);
-    let c = Int24::from_i32(0x7F_FFFF);
+    let c = MAX;
     test_assert!(t, a - b == c);
     test_assert!(t, a.const_sub(b) == c);
 }
@@ -265,32 +271,30 @@ fn test_mul(t: &impl TestOps) {
 
     let a = Int24::from_i32(0x7F_0000);
     let b = Int24::from_i32(2);
-    let c = Int24::from_i32(0x7F_FFFF);
+    let c = MAX;
     test_assert!(t, a * b == c);
     test_assert!(t, a.const_mul(b) == c);
 
     let a = Int24::from_i32(-0x80_FFFF);
     let b = Int24::from_i32(2);
-    let c = Int24::from_i32(-0x80_0000);
+    let c = MIN;
     test_assert!(t, a * b == c);
     test_assert!(t, a.const_mul(b) == c);
 
-    let max = Int24::from_i32(0x7F_FFFF);
-    let min = Int24::from_i32(-0x80_0000);
     let a = Int24::from_i32(0x1000);
     let b = Int24::from_i32(0x8_0000);
-    test_assert!(t, a * b == max);
-    test_assert!(t, a.const_mul(b) == max);
-    test_assert!(t, a * -b == min);
-    test_assert!(t, a.const_mul(b.const_neg()) == min);
-    test_assert!(t, max * max == max);
-    test_assert!(t, max.const_mul(max) == max);
-    test_assert!(t, min * min == max);
-    test_assert!(t, min.const_mul(min) == max);
-    test_assert!(t, max * min == min);
-    test_assert!(t, max.const_mul(min) == min);
-    test_assert!(t, min * max == min);
-    test_assert!(t, min.const_mul(max) == min);
+    test_assert!(t, a * b == MAX);
+    test_assert!(t, a.const_mul(b) == MAX);
+    test_assert!(t, a * -b == MIN);
+    test_assert!(t, a.const_mul(b.const_neg()) == MIN);
+    test_assert!(t, MAX * MAX == MAX);
+    test_assert!(t, MAX.const_mul(MAX) == MAX);
+    test_assert!(t, MIN * MIN == MAX);
+    test_assert!(t, MIN.const_mul(MIN) == MAX);
+    test_assert!(t, MAX * MIN == MIN);
+    test_assert!(t, MAX.const_mul(MIN) == MIN);
+    test_assert!(t, MIN * MAX == MIN);
+    test_assert!(t, MIN.const_mul(MAX) == MIN);
 }
 
 fn test_div(t: &impl TestOps) {
@@ -314,61 +318,52 @@ fn test_div(t: &impl TestOps) {
     test_assert!(t, a / b == c);
     test_assert!(t, a.const_div(b) == c);
 
-    let a = Int24::from_i32(-0x80_0000);
-    let b = Int24::from_i32(-1);
-    let c = Int24::from_i32(0x7F_FFFF); // sat
+    let a = MIN;
+    let b = MINUSONE;
+    let c = MAX; // sat
     test_assert!(t, a / b == c);
     test_assert!(t, a.const_div(b) == c);
 
-    let min = Int24::from_i32(-0x80_0000);
-    let max = Int24::from_i32(0x7F_FFFF);
     for k in 0..24 {
         let p = Int24::from_i32(1 << k);
         let c = Int24::from_i32(-0x80_0000 >> k);
-        test_assert!(t, min / p == c);
-        test_assert!(t, min.const_div(p) == c);
+        test_assert!(t, MIN / p == c);
+        test_assert!(t, MIN.const_div(p) == c);
     }
     let c = Int24::from_i32(0x40_0000);
-    test_assert!(t, min / Int24::from_i32(-2) == c);
-    test_assert!(t, min.const_div(Int24::from_i32(-2)) == c);
-    let zero = Int24::from_i32(0);
-    let one = Int24::from_i32(1);
-    test_assert!(t, max / min == zero);
-    test_assert!(t, max.const_div(min) == zero);
-    test_assert!(t, (-max) / min == zero);
-    test_assert!(t, max.const_neg().const_div(min) == zero);
-    test_assert!(t, min / min == one);
-    test_assert!(t, min.const_div(min) == one);
+    test_assert!(t, MIN / Int24::from_i32(-2) == c);
+    test_assert!(t, MIN.const_div(Int24::from_i32(-2)) == c);
+    test_assert!(t, MAX / MIN == ZERO);
+    test_assert!(t, MAX.const_div(MIN) == ZERO);
+    test_assert!(t, (-MAX) / MIN == ZERO);
+    test_assert!(t, MAX.const_neg().const_div(MIN) == ZERO);
+    test_assert!(t, MIN / MIN == ONE);
+    test_assert!(t, MIN.const_div(MIN) == ONE);
 
-    let max = Int24::from_i32(0x7F_FFFF);
-    let min = Int24::from_i32(-0x80_0000);
-    let zero = Int24::from_i32(0);
     for (a, c) in [
-        (100, max),
-        (0, max),
-        (-100, min),
-        (max.to_i32(), max),
-        (min.to_i32(), min),
+        (100, MAX),
+        (0, MAX),
+        (-100, MIN),
+        (MAX.to_i32(), MAX),
+        (MIN.to_i32(), MIN),
     ] {
         let a = Int24::from_i32(a);
-        test_assert!(t, a / zero == c);
-        test_assert!(t, a.const_div(zero) == c);
+        test_assert!(t, a / ZERO == c);
+        test_assert!(t, a.const_div(ZERO) == c);
     }
 }
 
 fn test_shl8div(t: &impl TestOps) {
     t.begin("shl8div");
 
-    let min = Int24::from_i32(-0x80_0000);
-    let max = Int24::from_i32(0x7F_FFFF);
     for b in [1, 256] {
         let b = Int24::from_i32(b);
-        test_assert!(t, min.shl8div(b) == min);
-        test_assert!(t, min.const_shl8div(b) == min);
+        test_assert!(t, MIN.shl8div(b) == MIN);
+        test_assert!(t, MIN.const_shl8div(b) == MIN);
     }
     let c = Int24::from_i32(-255);
-    test_assert!(t, max.shl8div(min) == c);
-    test_assert!(t, max.const_shl8div(min) == c);
+    test_assert!(t, MAX.shl8div(MIN) == c);
+    test_assert!(t, MAX.const_shl8div(MIN) == c);
 
     let a = Int24::from_i32(100000);
     let b = Int24::from_i32(1010);
@@ -394,24 +389,21 @@ fn test_shl8div(t: &impl TestOps) {
     test_assert!(t, a.shl8div(b) == c);
     test_assert!(t, a.const_shl8div(b) == c);
 
-    let max = Int24::from_i32(0x7F_FFFF);
-    let min = Int24::from_i32(-0x80_0000);
-    let zero = Int24::from_i32(0);
     for (a, c) in [
-        (100, max),
-        (0, max),
-        (-100, min),
-        (max.to_i32(), max),
-        (min.to_i32(), min),
+        (100, MAX),
+        (0, MAX),
+        (-100, MIN),
+        (MAX.to_i32(), MAX),
+        (MIN.to_i32(), MIN),
     ] {
         let a = Int24::from_i32(a);
-        test_assert!(t, a.shl8div(zero) == c);
-        test_assert!(t, a.const_shl8div(zero) == c);
+        test_assert!(t, a.shl8div(ZERO) == c);
+        test_assert!(t, a.const_shl8div(ZERO) == c);
     }
 
-    let b = Int24::from_i32(-1);
-    test_assert!(t, min.shl8div(b) == max);
-    test_assert!(t, min.const_shl8div(b) == max);
+    let b = MINUSONE;
+    test_assert!(t, MIN.shl8div(b) == MAX);
+    test_assert!(t, MIN.const_shl8div(b) == MAX);
 }
 
 fn test_neg(t: &impl TestOps) {
@@ -427,18 +419,18 @@ fn test_neg(t: &impl TestOps) {
     test_assert!(t, -a == b);
     test_assert!(t, a.const_neg() == b);
 
-    let a = Int24::from_i32(0x7F_FFFF);
+    let a = MAX;
     let b = Int24::from_i32(-0x7F_FFFF);
     test_assert!(t, -a == b);
     test_assert!(t, a.const_neg() == b);
 
     let a = Int24::from_i32(-0x7F_FFFF);
-    let b = Int24::from_i32(0x7F_FFFF);
+    let b = MAX;
     test_assert!(t, -a == b);
     test_assert!(t, a.const_neg() == b);
 
-    let a = Int24::from_i32(-0x80_0000);
-    let b = Int24::from_i32(0x7F_FFFF); // saturated
+    let a = MIN;
+    let b = MAX; // saturated
     test_assert!(t, -a == b);
     test_assert!(t, a.const_neg() == b);
 }
@@ -456,18 +448,18 @@ fn test_abs(t: &impl TestOps) {
     test_assert!(t, a.abs() == b);
     test_assert!(t, a.const_abs() == b);
 
-    let a = Int24::from_i32(0x7F_FFFF);
-    let b = Int24::from_i32(0x7F_FFFF);
+    let a = MAX;
+    let b = MAX;
     test_assert!(t, a.abs() == b);
     test_assert!(t, a.const_abs() == b);
 
     let a = Int24::from_i32(-0x7F_FFFF);
-    let b = Int24::from_i32(0x7F_FFFF);
+    let b = MAX;
     test_assert!(t, a.abs() == b);
     test_assert!(t, a.const_abs() == b);
 
-    let a = Int24::from_i32(-0x80_0000);
-    let b = Int24::from_i32(0x7F_FFFF); // saturated
+    let a = MIN;
+    let b = MAX; // saturated
     test_assert!(t, a.abs() == b);
     test_assert!(t, a.const_abs() == b);
 }
@@ -488,13 +480,13 @@ fn test_shl(t: &impl TestOps) {
     let b = Int24::from_i32(655360);
     test_assert!(t, a.shl16() == b);
 
-    let a = Int24::from_i32(-1);
-    let b = Int24::from_i32(-0x80_0000);
+    let a = MINUSONE;
+    let b = MIN;
     test_assert!(t, a << 23 == b);
     test_assert!(t, a.const_shl(23) == b);
 
-    let a = Int24::from_i32(-1);
-    let b = Int24::from_i32(0);
+    let a = MINUSONE;
+    let b = ZERO;
     for count in [24u8, 31, 32, 33, 40] {
         test_assert!(t, a << count == b);
         test_assert!(t, a.const_shl(count) == b);
@@ -514,22 +506,22 @@ fn test_shr(t: &impl TestOps) {
     test_assert!(t, a >> 2 == b);
     test_assert!(t, a.const_shr(2) == b);
 
-    let a = Int24::from_i32(0x7F_FFFF);
-    let b = Int24::from_i32(0);
+    let a = MAX;
+    let b = ZERO;
     test_assert!(t, a >> 23 == b);
     test_assert!(t, a.const_shr(23) == b);
-    let a = Int24::from_i32(-0x80_0000);
-    let b = Int24::from_i32(-1);
+    let a = MIN;
+    let b = MINUSONE;
     test_assert!(t, a >> 23 == b);
     test_assert!(t, a.const_shr(23) == b);
 
     for count in [24u8, 31, 32, 33, 40] {
-        let a = Int24::from_i32(0x7F_FFFF);
-        let b = Int24::from_i32(0);
+        let a = MAX;
+        let b = ZERO;
         test_assert!(t, a >> count == b);
         test_assert!(t, a.const_shr(count) == b);
-        let a = Int24::from_i32(-0x80_0000);
-        let b = Int24::from_i32(-1);
+        let a = MIN;
+        let b = MINUSONE;
         test_assert!(t, a >> count == b);
         test_assert!(t, a.const_shr(count) == b);
     }
