@@ -1,4 +1,4 @@
-.PHONY: all clean dasm isp isp-fuses isp-flash dw dw-flash
+.PHONY: all clean dasm isp isp-fuses isp-flash dw dw-flash doc
 
 all:
 	$(MAKE) -C avr-int24 test
