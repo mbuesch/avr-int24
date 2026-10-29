@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 // Copyright (C) 2025 Michael Büsch <m@bues.ch>
 
-use crate::raw::Int24Raw;
+use crate::raw::IntS24Raw;
 use core::arch::asm;
 
 #[inline(always)]
-pub fn asm_mulsat24(a: Int24Raw, mut b: Int24Raw) -> Int24Raw {
+pub fn asm_mulsat24(a: IntS24Raw, mut b: IntS24Raw) -> IntS24Raw {
     // SAFETY: The assembly code is manually checked.
     unsafe {
         asm!(
@@ -131,7 +131,7 @@ pub fn asm_mulsat24(a: Int24Raw, mut b: Int24Raw) -> Int24Raw {
 
 #[inline(never)]
 #[allow(unused_assignments)]
-pub fn asm_divsat24(mut a: Int24Raw, mut b: Int24Raw, a_shl8: bool) -> Int24Raw {
+pub fn asm_divsat24(mut a: IntS24Raw, mut b: IntS24Raw, a_shl8: bool) -> IntS24Raw {
     let a_shl8 = a_shl8 as u8;
     // SAFETY: The assembly code is manually checked.
     unsafe {
@@ -323,7 +323,7 @@ pub fn asm_divsat24(mut a: Int24Raw, mut b: Int24Raw, a_shl8: bool) -> Int24Raw 
 }
 
 #[inline(always)]
-pub fn asm_negsat24(mut a: Int24Raw) -> Int24Raw {
+pub fn asm_negsat24(mut a: IntS24Raw) -> IntS24Raw {
     // SAFETY: The assembly code is manually checked.
     unsafe {
         asm!(
@@ -357,7 +357,7 @@ pub fn asm_negsat24(mut a: Int24Raw) -> Int24Raw {
 
 #[inline(always)]
 #[allow(unused_assignments)]
-pub fn asm_shl24(mut a: Int24Raw, mut count: u8) -> Int24Raw {
+pub fn asm_shl24(mut a: IntS24Raw, mut count: u8) -> IntS24Raw {
     // SAFETY: The assembly code is manually checked.
     unsafe {
         asm!(
@@ -383,7 +383,7 @@ pub fn asm_shl24(mut a: Int24Raw, mut count: u8) -> Int24Raw {
 
 #[inline(always)]
 #[allow(unused_assignments)]
-pub fn asm_shr24(mut a: Int24Raw, mut count: u8) -> Int24Raw {
+pub fn asm_shr24(mut a: IntS24Raw, mut count: u8) -> IntS24Raw {
     // SAFETY: The assembly code is manually checked.
     unsafe {
         asm!(
@@ -408,7 +408,7 @@ pub fn asm_shr24(mut a: Int24Raw, mut count: u8) -> Int24Raw {
 }
 
 #[inline(always)]
-pub fn asm_ge24(a: Int24Raw, b: Int24Raw) -> bool {
+pub fn asm_ge24(a: IntS24Raw, b: IntS24Raw) -> bool {
     let mut c: u8;
     // SAFETY: The assembly code is manually checked.
     unsafe {

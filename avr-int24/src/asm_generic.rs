@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 // Copyright (C) 2025 Michael Büsch <m@bues.ch>
 
-use crate::raw::Int24Raw;
+use crate::raw::IntS24Raw;
 
-fn to_i32(a: Int24Raw) -> i32 {
+fn to_i32(a: IntS24Raw) -> i32 {
     if a.2 & 0x80 == 0 {
         i32::from_le_bytes([a.0, a.1, a.2, 0x00])
     } else {
@@ -12,12 +12,12 @@ fn to_i32(a: Int24Raw) -> i32 {
     }
 }
 
-fn from_i32(a: i32) -> Int24Raw {
+fn from_i32(a: i32) -> IntS24Raw {
     let a = a.to_le_bytes();
     (a[0], a[1], a[2])
 }
 
-pub fn asm_mulsat24(a: Int24Raw, b: Int24Raw) -> Int24Raw {
+pub fn asm_mulsat24(a: IntS24Raw, b: IntS24Raw) -> IntS24Raw {
     let c = to_i32(a) as i64 * to_i32(b) as i64;
     if c > 0x7F_FFFF {
         from_i32(0x7F_FFFF)
@@ -28,7 +28,7 @@ pub fn asm_mulsat24(a: Int24Raw, b: Int24Raw) -> Int24Raw {
     }
 }
 
-pub fn asm_divsat24(a: Int24Raw, b: Int24Raw, a_shl8: bool) -> Int24Raw {
+pub fn asm_divsat24(a: IntS24Raw, b: IntS24Raw, a_shl8: bool) -> IntS24Raw {
     if b == (0, 0, 0) {
         if a.2 & 0x80 == 0 {
             (0xFF, 0xFF, 0x7F)
@@ -54,7 +54,7 @@ pub fn asm_divsat24(a: Int24Raw, b: Int24Raw, a_shl8: bool) -> Int24Raw {
     }
 }
 
-pub fn asm_negsat24(a: Int24Raw) -> Int24Raw {
+pub fn asm_negsat24(a: IntS24Raw) -> IntS24Raw {
     let b = from_i32(to_i32(a).wrapping_neg());
     if a.2 & 0x80 != 0 && b.2 & 0x80 != 0 {
         (0xFF, 0xFF, 0x7F)
@@ -63,18 +63,18 @@ pub fn asm_negsat24(a: Int24Raw) -> Int24Raw {
     }
 }
 
-pub fn asm_shl24(a: Int24Raw, count: u8) -> Int24Raw {
+pub fn asm_shl24(a: IntS24Raw, count: u8) -> IntS24Raw {
     if count >= 24 {
         return from_i32(0);
     }
     from_i32(to_i32(a) << count)
 }
 
-pub fn asm_shr24(a: Int24Raw, count: u8) -> Int24Raw {
+pub fn asm_shr24(a: IntS24Raw, count: u8) -> IntS24Raw {
     from_i32(to_i32(a) >> count.min(23))
 }
 
-pub fn asm_ge24(a: Int24Raw, b: Int24Raw) -> bool {
+pub fn asm_ge24(a: IntS24Raw, b: IntS24Raw) -> bool {
     to_i32(a) >= to_i32(b)
 }
 

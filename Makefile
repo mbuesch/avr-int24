@@ -27,3 +27,6 @@ dw:
 dw-flash:
 	$(MAKE) -C avr-int24 test
 	$(MAKE) -C avr-int24-test dw-flash
+
+doc:
+	$(MAKE) -C avr-int24 doc

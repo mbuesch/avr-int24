@@ -4,7 +4,7 @@
 
 //! # 24 bit integer arithmetic for AVR
 //!
-//! This library provides a 24-bit signed integer type, `Int24`, for Rust.
+//! This library provides a 24-bit signed integer type, `IntS24` (alias `is24`), for Rust.
 //! It is designed for use on AVR microcontrollers.
 //!
 //! No operation from this crate ever panics.
@@ -16,10 +16,10 @@
 //! Here are some example uses:
 //!
 //! ```
-//! use avr_int24::Int24;
+//! use avr_int24::is24;
 //!
-//! let a = Int24::from_i16(30_000);
-//! let b = Int24::from_i16(10_000);
+//! let a = is24::from_i16(30_000);
+//! let b = is24::from_i16(10_000);
 //!
 //! // Addition
 //! let c = a + b;
@@ -30,7 +30,7 @@
 //! assert_eq!(c.to_i32(), -20_000);
 //!
 //! // Multiplication
-//! let c = a * Int24::from_i16(-10);
+//! let c = a * is24::from_i16(-10);
 //! assert_eq!(c.to_i32(), -300_000);
 //!
 //! // Division
@@ -59,12 +59,12 @@
 #![cfg_attr(not(test), no_std)]
 #![cfg_attr(target_arch = "avr", feature(asm_experimental_arch))]
 
-pub use crate::raw::Int24Raw;
+pub use crate::raw::IntS24Raw;
 use crate::raw::{
     abs24, add24,
     conv::{
-        cast_i24raw_to_i8, cast_i24raw_to_i16, i8_to_i24raw, i16_to_i24raw, i24raw_to_i8_sat,
-        i24raw_to_i16_sat, i24raw_to_i32, i32_to_i24raw_sat,
+        cast_raw_to_i8, cast_raw_to_i16, i8_to_raw, i16_to_raw, raw_to_i8_sat,
+        raw_to_i16_sat, raw_to_i32, i32_to_raw_sat,
     },
     div24, eq24, ge24, mul24, neg24, raw_zero, shl24, shl24_by8, shl24_by8_div24, shl24_by16,
     shr24, shr24_by8, shr24_by16, sub24,
@@ -85,122 +85,123 @@ pub mod unit_tests;
 
 mod raw;
 
-/// Shorthand for [Int24].
-pub type I24 = Int24;
+/// Shorthand for [IntS24].
+#[allow(non_camel_case_types)]
+pub type is24 = IntS24;
 
-/// 24 bit signed integer.
+/// 24 bit saturating signed integer.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 #[repr(transparent)]
-pub struct Int24(Int24Raw);
+pub struct IntS24(IntS24Raw);
 
 #[allow(clippy::should_implement_trait)]
-impl Int24 {
-    /// Construct a new zero [Int24].
+impl IntS24 {
+    /// Construct a new zero [IntS24].
     pub const fn zero() -> Self {
         Self(raw_zero())
     }
 
-    /// Construct a new zero [Int24].
+    /// Construct a new zero [IntS24].
     pub const fn new() -> Self {
         Self::zero()
     }
 
-    /// Construct a new [Int24] from a little endian raw tuple.
-    pub const fn from_raw(v: Int24Raw) -> Self {
+    /// Construct a new [IntS24] from a little endian raw tuple.
+    pub const fn from_raw(v: IntS24Raw) -> Self {
         Self(v)
     }
 
-    /// Construct a new [Int24] from raw little endian bytes.
+    /// Construct a new [IntS24] from raw little endian bytes.
     pub const fn from_le_bytes(bytes: [u8; 3]) -> Self {
         Self::from_raw((bytes[0], bytes[1], bytes[2]))
     }
 
-    /// Construct a new [Int24] from a signed 8 bit integer.
+    /// Construct a new [IntS24] from a signed 8 bit integer.
     pub const fn from_i8(v: i8) -> Self {
-        Self::from_raw(i8_to_i24raw(v))
+        Self::from_raw(i8_to_raw(v))
     }
 
-    /// Construct a new [Int24] from a signed 16 bit integer.
+    /// Construct a new [IntS24] from a signed 16 bit integer.
     pub const fn from_i16(v: i16) -> Self {
-        Self::from_raw(i16_to_i24raw(v))
+        Self::from_raw(i16_to_raw(v))
     }
 
-    /// Construct and saturate a new [Int24] from a signed 32 bit integer.
+    /// Construct and saturate a new [IntS24] from a signed 32 bit integer.
     pub const fn from_i32(v: i32) -> Self {
-        Self(i32_to_i24raw_sat(v))
+        Self(i32_to_raw_sat(v))
     }
 
-    /// Convert this [Int24] to little endian bytes.
+    /// Convert this [IntS24] to little endian bytes.
     pub const fn to_le_bytes(self) -> [u8; 3] {
         [self.0.0, self.0.1, self.0.2]
     }
 
-    /// Convert and saturate this [Int24] to a signed 8 bit integer.
+    /// Convert and saturate this [IntS24] to a signed 8 bit integer.
     pub const fn to_i8(self) -> i8 {
-        i24raw_to_i8_sat(self.0)
+        raw_to_i8_sat(self.0)
     }
 
-    /// Convert and saturate this [Int24] to a signed 16 bit integer.
+    /// Convert and saturate this [IntS24] to a signed 16 bit integer.
     pub const fn to_i16(self) -> i16 {
-        i24raw_to_i16_sat(self.0)
+        raw_to_i16_sat(self.0)
     }
 
-    /// Convert this [Int24] to a signed 32 bit integer.
+    /// Convert this [IntS24] to a signed 32 bit integer.
     pub const fn to_i32(self) -> i32 {
-        i24raw_to_i32(self.0)
+        raw_to_i32(self.0)
     }
 
-    /// Cast this [Int24] to a signed 8 bit integer *without* *saturation*.
+    /// Cast this [IntS24] to a signed 8 bit integer *without* *saturation*.
     pub const fn cast_to_i8(self) -> i8 {
-        cast_i24raw_to_i8(self.0)
+        cast_raw_to_i8(self.0)
     }
 
-    /// Cast this [Int24] to a signed 16 bit integer *without* *saturation*.
+    /// Cast this [IntS24] to a signed 16 bit integer *without* *saturation*.
     pub const fn cast_to_i16(self) -> i16 {
-        cast_i24raw_to_i16(self.0)
+        cast_raw_to_i16(self.0)
     }
 
-    /// Add and saturate two [Int24].
+    /// Add and saturate two [IntS24].
     #[inline(never)]
     pub fn add(self, other: Self) -> Self {
         Self::from_raw(add24(self.0, other.0))
     }
 
-    /// Add and saturate two [Int24].
+    /// Add and saturate two [IntS24].
     ///
     /// This is the `const` variant.
     /// Only call this from `const` context.
-    /// From non-`const` context call [Int24::add] instead to get optimized code.
+    /// From non-`const` context call [IntS24::add] instead to get optimized code.
     pub const fn const_add(self, other: Self) -> Self {
         Self::from_i32(self.to_i32() + other.to_i32())
     }
 
-    /// Subtract and saturate two [Int24].
+    /// Subtract and saturate two [IntS24].
     #[inline(never)]
     pub fn sub(self, other: Self) -> Self {
         Self::from_raw(sub24(self.0, other.0))
     }
 
-    /// Subtract and saturate two [Int24].
+    /// Subtract and saturate two [IntS24].
     ///
     /// This is the `const` variant.
     /// Only call this from `const` context.
-    /// From non-`const` context call [Int24::sub] instead to get optimized code.
+    /// From non-`const` context call [IntS24::sub] instead to get optimized code.
     pub const fn const_sub(self, other: Self) -> Self {
         Self::from_i32(self.to_i32() - other.to_i32())
     }
 
-    /// Multiply and saturate two [Int24].
+    /// Multiply and saturate two [IntS24].
     #[inline(never)]
     pub fn mul(self, other: Self) -> Self {
         Self::from_raw(mul24(self.0, other.0))
     }
 
-    /// Multiply and saturate two [Int24].
+    /// Multiply and saturate two [IntS24].
     ///
     /// This is the `const` variant.
     /// Only call this from `const` context.
-    /// From non-`const` context call [Int24::mul] instead to get optimized code.
+    /// From non-`const` context call [IntS24::mul] instead to get optimized code.
     pub const fn const_mul(self, other: Self) -> Self {
         let p = self.to_i32() as i64 * other.to_i32() as i64;
         Self::from_i32(if p > i32::MAX as i64 {
@@ -212,7 +213,7 @@ impl Int24 {
         })
     }
 
-    /// Divide and saturate two [Int24].
+    /// Divide and saturate two [IntS24].
     ///
     /// Division by zero does not panic, it saturates instead:
     /// the result is `MAX` for a non-negative dividend (including `0 / 0`)
@@ -222,7 +223,7 @@ impl Int24 {
         Self::from_raw(div24(self.0, other.0))
     }
 
-    /// Divide and saturate two [Int24].
+    /// Divide and saturate two [IntS24].
     ///
     /// Division by zero does not panic, it saturates instead:
     /// the result is `MAX` for a non-negative dividend (including `0 / 0`)
@@ -230,7 +231,7 @@ impl Int24 {
     ///
     /// This is the `const` variant.
     /// Only call this from `const` context.
-    /// From non-`const` context call [Int24::div] instead to get optimized code.
+    /// From non-`const` context call [IntS24::div] instead to get optimized code.
     pub const fn const_div(self, other: Self) -> Self {
         let (a, b) = (self.to_i32(), other.to_i32());
         if b == 0 {
@@ -264,7 +265,7 @@ impl Int24 {
     ///
     /// This is the `const` variant.
     /// Only call this from `const` context.
-    /// From non-`const` context call [Int24::shl8div] instead to get optimized code.
+    /// From non-`const` context call [IntS24::shl8div] instead to get optimized code.
     pub const fn const_shl8div(self, other: Self) -> Self {
         let (a, b) = ((self.to_i32() as i64) << 8, other.to_i32() as i64);
         if b == 0 {
@@ -288,7 +289,7 @@ impl Int24 {
     ///
     /// This is the `const` variant.
     /// Only call this from `const` context.
-    /// From non-`const` context call [Int24::neg] instead to get optimized code.
+    /// From non-`const` context call [IntS24::neg] instead to get optimized code.
     pub const fn const_neg(self) -> Self {
         Self::from_i32(-self.to_i32())
     }
@@ -303,7 +304,7 @@ impl Int24 {
     ///
     /// This is the `const` variant.
     /// Only call this from `const` context.
-    /// From non-`const` context call [Int24::abs] instead to get optimized code.
+    /// From non-`const` context call [IntS24::abs] instead to get optimized code.
     pub const fn const_abs(self) -> Self {
         if self.to_i32() < 0 {
             self.const_neg()
@@ -343,7 +344,7 @@ impl Int24 {
     ///
     /// This is the `const` variant.
     /// Only call this from `const` context.
-    /// From non-`const` context call [Int24::shl] instead to get optimized code.
+    /// From non-`const` context call [IntS24::shl] instead to get optimized code.
     pub const fn const_shl(self, count: u8) -> Self {
         if count >= 24 {
             return Self::from_i32(0);
@@ -376,7 +377,7 @@ impl Int24 {
     ///
     /// This is the `const` variant.
     /// Only call this from `const` context.
-    /// From non-`const` context call [Int24::shr] instead to get optimized code.
+    /// From non-`const` context call [IntS24::shr] instead to get optimized code.
     pub const fn const_shr(self, count: u8) -> Self {
         let count = if count > 23 { 23 } else { count };
         Self::from_i32(self.to_i32() >> count)
@@ -398,7 +399,7 @@ impl Int24 {
     ///
     /// This is the `const` variant.
     /// Only call this from `const` context.
-    /// From non-`const` context call [Int24::cmp] instead to get optimized code.
+    /// From non-`const` context call [IntS24::cmp] instead to get optimized code.
     pub const fn const_cmp(self, other: Self) -> core::cmp::Ordering {
         if self.to_i32() == other.to_i32() {
             core::cmp::Ordering::Equal
@@ -410,25 +411,25 @@ impl Int24 {
     }
 }
 
-impl Default for Int24 {
+impl Default for IntS24 {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl core::cmp::Ord for Int24 {
+impl core::cmp::Ord for IntS24 {
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
         Self::cmp(*self, *other)
     }
 }
 
-impl core::cmp::PartialOrd for Int24 {
+impl core::cmp::PartialOrd for IntS24 {
     fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl core::ops::Add for Int24 {
+impl core::ops::Add for IntS24 {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
@@ -436,13 +437,13 @@ impl core::ops::Add for Int24 {
     }
 }
 
-impl core::ops::AddAssign for Int24 {
+impl core::ops::AddAssign for IntS24 {
     fn add_assign(&mut self, other: Self) {
         self.0 = (*self + other).0;
     }
 }
 
-impl core::ops::Sub for Int24 {
+impl core::ops::Sub for IntS24 {
     type Output = Self;
 
     fn sub(self, other: Self) -> Self {
@@ -450,13 +451,13 @@ impl core::ops::Sub for Int24 {
     }
 }
 
-impl core::ops::SubAssign for Int24 {
+impl core::ops::SubAssign for IntS24 {
     fn sub_assign(&mut self, other: Self) {
         self.0 = (*self - other).0;
     }
 }
 
-impl core::ops::Mul for Int24 {
+impl core::ops::Mul for IntS24 {
     type Output = Self;
 
     fn mul(self, other: Self) -> Self {
@@ -464,13 +465,13 @@ impl core::ops::Mul for Int24 {
     }
 }
 
-impl core::ops::MulAssign for Int24 {
+impl core::ops::MulAssign for IntS24 {
     fn mul_assign(&mut self, other: Self) {
         self.0 = (*self * other).0;
     }
 }
 
-impl core::ops::Div for Int24 {
+impl core::ops::Div for IntS24 {
     type Output = Self;
 
     fn div(self, other: Self) -> Self {
@@ -478,13 +479,13 @@ impl core::ops::Div for Int24 {
     }
 }
 
-impl core::ops::DivAssign for Int24 {
+impl core::ops::DivAssign for IntS24 {
     fn div_assign(&mut self, other: Self) {
         self.0 = (*self / other).0;
     }
 }
 
-impl core::ops::Neg for Int24 {
+impl core::ops::Neg for IntS24 {
     type Output = Self;
 
     fn neg(self) -> Self {
@@ -492,7 +493,7 @@ impl core::ops::Neg for Int24 {
     }
 }
 
-impl core::ops::Shl<u8> for Int24 {
+impl core::ops::Shl<u8> for IntS24 {
     type Output = Self;
 
     fn shl(self, other: u8) -> Self {
@@ -500,13 +501,13 @@ impl core::ops::Shl<u8> for Int24 {
     }
 }
 
-impl core::ops::ShlAssign<u8> for Int24 {
+impl core::ops::ShlAssign<u8> for IntS24 {
     fn shl_assign(&mut self, other: u8) {
         self.0 = (*self << other).0;
     }
 }
 
-impl core::ops::Shr<u8> for Int24 {
+impl core::ops::Shr<u8> for IntS24 {
     type Output = Self;
 
     fn shr(self, other: u8) -> Self {
@@ -514,7 +515,7 @@ impl core::ops::Shr<u8> for Int24 {
     }
 }
 
-impl core::ops::ShrAssign<u8> for Int24 {
+impl core::ops::ShrAssign<u8> for IntS24 {
     fn shr_assign(&mut self, other: u8) {
         self.0 = (*self >> other).0;
     }

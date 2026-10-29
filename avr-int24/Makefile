@@ -4,3 +4,6 @@ test:
 
 clean:
 	cargo clean
+
+doc:
+	cargo doc --open

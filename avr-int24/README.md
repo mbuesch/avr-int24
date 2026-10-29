@@ -1,11 +1,11 @@
 # 24 bit integer arithmetic for AVR
 
-This library provides a 24-bit signed integer type, `Int24`, for Rust.
+This library provides a 24-bit signed integer type, `IntS24` (alias `is24`), for Rust.
 It is designed for use on AVR microcontrollers.
 
 ## Features
 
-- 24-bit signed integer type (`Int24`)
+- 24-bit signed integer type (`IntS24` / `is24`)
 - Saturating arithmetic operations: addition, subtraction, multiplication, division
 - Bitwise operations: shift left, shift right
 - Specialized operations: Shift left and then divide
@@ -16,7 +16,7 @@ It is designed for use on AVR microcontrollers.
 
 ## Usage
 
-To use the `Int24` type, add `avr-int24` as a dependency to your `Cargo.toml`
+To use the `IntS24` / `is24` type, add `avr-int24` as a dependency to your `Cargo.toml`
 
 ```toml
 [dependencies]
@@ -26,10 +26,10 @@ avr-int24 = "2"
 and then use it in your code:
 
 ```rust
-use avr_int24::Int24;
+use avr_int24::is24;
 
-let a = Int24::from_i16(30000);
-let b = Int24::from_i16(10000);
+let a = is24::from_i16(30000);
+let b = is24::from_i16(10000);
 
 let c = a + b;
 
