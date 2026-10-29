@@ -389,6 +389,22 @@ fn test_shl8div(t: &impl TestOps) {
     test_assert!(t, a.shl8div(b) == c);
     test_assert!(t, a.const_shl8div(b) == c);
 
+    for (a, b, c) in [
+        (40000, 1, MAX),
+        (40000, -1, MIN),
+        (32769, 1, MAX),
+        (65535, 1, MAX),
+        (-32769, 1, MIN),
+        (-65535, 1, MIN),
+        (-32768, 1, MIN),
+        (32767, 1, Int24::from_i32(0x7FFF00)),
+    ] {
+        let a = Int24::from_i32(a);
+        let b = Int24::from_i32(b);
+        test_assert!(t, a.shl8div(b) == c);
+        test_assert!(t, a.const_shl8div(b) == c);
+    }
+
     for (a, c) in [
         (100, MAX),
         (0, MAX),
