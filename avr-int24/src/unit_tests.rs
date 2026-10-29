@@ -282,7 +282,7 @@ fn test_mul(t: &impl TestOps) {
     test_assert!(t, a * b == max);
     test_assert!(t, a.const_mul(b) == max);
     test_assert!(t, a * -b == min);
-    test_assert!(t, a.const_mul(b.neg()) == min);
+    test_assert!(t, a.const_mul(b.const_neg()) == min);
     test_assert!(t, max * max == max);
     test_assert!(t, max.const_mul(max) == max);
     test_assert!(t, min * min == max);
@@ -320,6 +320,26 @@ fn test_div(t: &impl TestOps) {
     test_assert!(t, a / b == c);
     test_assert!(t, a.const_div(b) == c);
 
+    let min = Int24::from_i32(-0x80_0000);
+    let max = Int24::from_i32(0x7F_FFFF);
+    for k in 0..24 {
+        let p = Int24::from_i32(1 << k);
+        let c = Int24::from_i32(-0x80_0000 >> k);
+        test_assert!(t, min / p == c);
+        test_assert!(t, min.const_div(p) == c);
+    }
+    let c = Int24::from_i32(0x40_0000);
+    test_assert!(t, min / Int24::from_i32(-2) == c);
+    test_assert!(t, min.const_div(Int24::from_i32(-2)) == c);
+    let zero = Int24::from_i32(0);
+    let one = Int24::from_i32(1);
+    test_assert!(t, max / min == zero);
+    test_assert!(t, max.const_div(min) == zero);
+    test_assert!(t, (-max) / min == zero);
+    test_assert!(t, max.const_neg().const_div(min) == zero);
+    test_assert!(t, min / min == one);
+    test_assert!(t, min.const_div(min) == one);
+
     let max = Int24::from_i32(0x7F_FFFF);
     let min = Int24::from_i32(-0x80_0000);
     let zero = Int24::from_i32(0);
@@ -338,6 +358,17 @@ fn test_div(t: &impl TestOps) {
 
 fn test_shl8div(t: &impl TestOps) {
     t.begin("shl8div");
+
+    let min = Int24::from_i32(-0x80_0000);
+    let max = Int24::from_i32(0x7F_FFFF);
+    for b in [1, 256] {
+        let b = Int24::from_i32(b);
+        test_assert!(t, min.shl8div(b) == min);
+        test_assert!(t, min.const_shl8div(b) == min);
+    }
+    let c = Int24::from_i32(-255);
+    test_assert!(t, max.shl8div(min) == c);
+    test_assert!(t, max.const_shl8div(min) == c);
 
     let a = Int24::from_i32(100000);
     let b = Int24::from_i32(1010);

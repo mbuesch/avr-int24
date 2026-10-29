@@ -174,11 +174,6 @@ pub fn asm_divsat24(mut a: Int24Raw, mut b: Int24Raw, a_shl8: bool) -> Int24Raw 
             "   neg {a0}",
             "   sbci {a1}, 0xFF",
             "   sbci {a2}, 0xFF",
-            "   sbrs {a2}, 7",
-            "   rjmp 1f",
-            "   ldi {a1}, 0xFF",        // saturate to max
-            "   mov {a0}, {a1}",
-            "   ldi {a2}, 0x7F",
             "1:",
 
             // b = abs(b)
@@ -189,11 +184,6 @@ pub fn asm_divsat24(mut a: Int24Raw, mut b: Int24Raw, a_shl8: bool) -> Int24Raw 
             "   neg {b0}",
             "   sbci {b1}, 0xFF",
             "   sbci {b2}, 0xFF",
-            "   sbrs {b2}, 7",
-            "   rjmp 1f",
-            "   ldi {b1}, 0xFF",        // saturate to max
-            "   mov {b0}, {b1}",
-            "   ldi {b2}, 0x7F",
             "1:",
 
             // check if 'a' shall be left shifted by 8 before division
@@ -274,9 +264,7 @@ pub fn asm_divsat24(mut a: Int24Raw, mut b: Int24Raw, a_shl8: bool) -> Int24Raw 
 
             "3: cp {a3}, __zero_reg__", // saturate 32 bit result
             "   breq 80f",
-            "   ldi {a2}, 0x7F",
-            "   ldi {a1}, 0xFF",
-            "   mov {a0}, {a1}",
+            "   ldi {a2}, 0xFF",        // magnitude overflow, saturated below
             "   rjmp 80f",
 
             // saturate to negative min
@@ -295,8 +283,14 @@ pub fn asm_divsat24(mut a: Int24Raw, mut b: Int24Raw, a_shl8: bool) -> Int24Raw 
 
             // adjust the result sign according to SREG.T
             "80:",
-            "   brtc 90f",
-            "   com {a2}",              // negate
+            "   brts 81f",
+            "   sbrc {a2}, 7",          // positive magnitude > MAX
+            "   rjmp 70b",
+            "   rjmp 90f",              // no overflow
+            "81:",
+            "   sbrc {a2}, 7",          // negative magnitude >= 2^23
+            "   rjmp 60b",
+            "   com {a2}",              // no overflow; negate
             "   com {a1}",
             "   neg {a0}",
             "   sbci {a1}, 0xFF",
