@@ -28,6 +28,9 @@ macro_rules! test_assert {
 fn test_base(t: &impl TestOps) {
     t.begin("base");
 
+    test_assert!(t, is24::MIN == MIN);
+    test_assert!(t, is24::MAX == MAX);
+
     let a = 0;
     let b = is24::new().to_i32();
     test_assert!(t, a == b);

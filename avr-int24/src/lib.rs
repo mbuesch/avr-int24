@@ -96,6 +96,11 @@ pub struct IntS24(IntS24Raw);
 
 #[allow(clippy::should_implement_trait)]
 impl IntS24 {
+    /// The minimum value of an [IntS24].
+    pub const MIN: Self = Self::from_i32(-0x80_0000);
+    /// The maximum value of an [IntS24].
+    pub const MAX: Self = Self::from_i32(0x7F_FFFF);
+
     /// Construct a new zero [IntS24].
     pub const fn zero() -> Self {
         Self(raw_zero())
